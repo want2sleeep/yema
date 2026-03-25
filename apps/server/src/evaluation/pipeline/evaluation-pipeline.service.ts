@@ -15,7 +15,7 @@ export class EvaluationPipelineService {
   ) {}
 
   async run(problem: Problem, submissionId: string, files: SubmissionFile[]): Promise<EvaluationReport> {
-    const staticResult = this.staticAnalysisService.analyze(problem, files);
+    const staticResult = await this.staticAnalysisService.analyze(problem, files);
     const renderResult = await this.renderAnalysisService.analyze(problem, submissionId, files);
     const llmFeedback = await this.llmAnalysisService.analyze(problem, files, staticResult, renderResult);
     return this.scoreAggregatorService.aggregate(submissionId, problem, staticResult, renderResult, llmFeedback);

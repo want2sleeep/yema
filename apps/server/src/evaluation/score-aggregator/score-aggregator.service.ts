@@ -25,7 +25,10 @@ export class ScoreAggregatorService {
     );
     const codeQualityScore = Math.max(
       0,
-      problem.config.weights.codeQuality - staticResult.lintWarnings * 4 - staticResult.lintErrors * 8,
+      problem.config.weights.codeQuality -
+        staticResult.lintWarnings * 4 -
+        staticResult.lintErrors * 8 -
+        staticResult.missingSelectors.length * 2,
     );
     const uiRenderingScore = Math.max(
       0,
@@ -39,6 +42,7 @@ export class ScoreAggregatorService {
       0,
       problem.config.weights.engineering -
         (staticResult.syntaxOk ? 0 : 10) -
+        staticResult.missingFiles.length * 6 -
         (renderResult.consoleErrors.length > 0 ? 4 : 0),
     );
     const totalScore = correctnessScore + codeQualityScore + uiRenderingScore + engineeringScore;

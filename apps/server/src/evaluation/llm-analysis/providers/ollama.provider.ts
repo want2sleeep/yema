@@ -16,6 +16,9 @@ export class OllamaProvider implements LlmProvider {
     const prompt = this.buildPrompt(input);
     const baseUrl = this.configService.get<string>("OLLAMA_BASE_URL") ?? "http://127.0.0.1:11434";
     const model = this.configService.get<string>("OLLAMA_MODEL") ?? "qwen3.5:4b";
+    const timeoutMs = Number(this.configService.get<string>("OLLAMA_TIMEOUT_MS") ?? "15000");
+    const abortController = new AbortController();
+    const timeout = setTimeout(() => abortController.abort(), timeoutMs);
 
     const response = await fetch(`${baseUrl}/api/generate`, {
       method: "POST",
@@ -28,6 +31,9 @@ export class OllamaProvider implements LlmProvider {
         stream: false,
         format: "json",
       }),
+      signal: abortController.signal,
+    }).finally(() => {
+      clearTimeout(timeout);
     });
 
     if (!response.ok) {
@@ -77,6 +83,7 @@ export class OllamaProvider implements LlmProvider {
         loadError: input.renderResult.loadError,
       })}`,
       `Evidence: ${JSON.stringify(input.evidence)}`,
+      `Lint messages: ${JSON.stringify(input.staticResult.lintMessages)}`,
       "",
       "Student files:",
       codeSummary,
