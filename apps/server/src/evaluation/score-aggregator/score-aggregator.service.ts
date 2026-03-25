@@ -18,7 +18,10 @@ export class ScoreAggregatorService {
   ): EvaluationReport {
     const correctnessScore = Math.max(
       0,
-      problem.config.weights.correctness - renderResult.missingSelectors.length * 8,
+      problem.config.weights.correctness -
+        renderResult.missingSelectors.length * 8 -
+        renderResult.missingTexts.length * 6 -
+        (renderResult.loadError ? 12 : 0),
     );
     const codeQualityScore = Math.max(
       0,
@@ -26,11 +29,17 @@ export class ScoreAggregatorService {
     );
     const uiRenderingScore = Math.max(
       0,
-      problem.config.weights.uiRendering - renderResult.missingSelectors.length * 6,
+      problem.config.weights.uiRendering -
+        renderResult.missingSelectors.length * 6 -
+        renderResult.missingTexts.length * 4 -
+        renderResult.consoleErrors.length * 2 -
+        (renderResult.loadError ? 10 : 0),
     );
     const engineeringScore = Math.max(
       0,
-      problem.config.weights.engineering - (staticResult.syntaxOk ? 0 : 10),
+      problem.config.weights.engineering -
+        (staticResult.syntaxOk ? 0 : 10) -
+        (renderResult.consoleErrors.length > 0 ? 4 : 0),
     );
     const totalScore = correctnessScore + codeQualityScore + uiRenderingScore + engineeringScore;
 
@@ -56,7 +65,7 @@ export class ScoreAggregatorService {
         uiRendering: {
           score: uiRenderingScore,
           maxScore: problem.config.weights.uiRendering,
-          summary: "Evaluates page presentation from the current render-analysis stage.",
+          summary: "Evaluates browser rendering, DOM checks, text checks and screenshot evidence.",
         },
         engineering: {
           score: engineeringScore,
@@ -67,6 +76,18 @@ export class ScoreAggregatorService {
       evidence: [...staticResult.evidence, ...renderResult.evidence],
       suggestions: llmFeedback.nextSteps,
       llmFeedback,
+      artifacts: {
+        screenshotPath: renderResult.screenshotPath,
+        screenshotUrl: renderResult.screenshotUrl,
+      },
+      renderDetails: {
+        renderOk: renderResult.renderOk,
+        consoleErrors: renderResult.consoleErrors,
+        missingSelectors: renderResult.missingSelectors,
+        matchedTexts: renderResult.matchedTexts,
+        missingTexts: renderResult.missingTexts,
+        loadError: renderResult.loadError,
+      },
       generatedAt: new Date().toISOString(),
     };
   }

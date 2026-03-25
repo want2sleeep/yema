@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
+import { ArtifactsController } from "./common/artifacts.controller.js";
 import { HealthController } from "./common/health.controller.js";
 import { DatabaseModule } from "./database/database.module.js";
 import { QueueModule } from "./queue/queue.module.js";
@@ -19,7 +20,7 @@ import { RuntimeStorageService } from "./storage/runtime-storage.service.js";
     QueueModule,
     SubmissionsModule,
   ],
-  controllers: [HealthController],
+  controllers: [HealthController, ArtifactsController],
   providers: [RuntimeStorageService],
 })
 export class AppModule {}

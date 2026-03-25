@@ -74,10 +74,27 @@ export type StaticAnalysisResult = {
 export type RenderCheckResult = {
   renderOk: boolean;
   screenshotPath?: string;
+  screenshotUrl?: string;
   consoleErrors: string[];
   missingSelectors: string[];
   matchedTexts: string[];
+  missingTexts: string[];
+  loadError?: string;
   evidence: EvidenceItem[];
+};
+
+export type EvaluationArtifacts = {
+  screenshotPath?: string;
+  screenshotUrl?: string;
+};
+
+export type EvaluationRenderDetails = {
+  renderOk: boolean;
+  consoleErrors: string[];
+  missingSelectors: string[];
+  matchedTexts: string[];
+  missingTexts: string[];
+  loadError?: string;
 };
 
 export type LlmFeedback = {
@@ -102,6 +119,8 @@ export type EvaluationReport = {
   evidence: EvidenceItem[];
   suggestions: string[];
   llmFeedback?: LlmFeedback;
+  artifacts?: EvaluationArtifacts;
+  renderDetails?: EvaluationRenderDetails;
   generatedAt: string;
 };
 
