@@ -1,0 +1,24 @@
+{
+  "name": "yema",
+  "version": "0.1.0",
+  "description": "yema - LLM-powered frontend online judge",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:want2sleeep/yema.git"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:web\"",
+    "dev:web": "npm run dev --workspace @yema/web",
+    "dev:server": "npm run start:dev --workspace @yema/server",
+    "build": "npm run build --workspaces",
+    "lint": "npm run lint --workspaces"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
