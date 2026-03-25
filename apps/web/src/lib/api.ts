@@ -8,6 +8,12 @@ import {
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3001/api";
 
+export class ApiError extends Error {
+  constructor(public readonly status: number, message: string) {
+    super(message);
+  }
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE}${path}`, {
     ...init,
@@ -19,7 +25,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   });
 
   if (!response.ok) {
-    throw new Error(`Request failed: ${response.status}`);
+    throw new ApiError(response.status, `Request failed: ${response.status}`);
   }
 
   return response.json() as Promise<T>;
@@ -46,4 +52,16 @@ export function getSubmission(id: string) {
 
 export function getReport(id: string) {
   return request<EvaluationReport>(`/submissions/${id}/report`);
+}
+
+export async function tryGetReport(id: string) {
+  try {
+    return await getReport(id);
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 404) {
+      return null;
+    }
+
+    throw error;
+  }
 }

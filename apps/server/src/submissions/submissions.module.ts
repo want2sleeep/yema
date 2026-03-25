@@ -1,13 +1,13 @@
 import { Module } from "@nestjs/common";
+import { DatabaseModule } from "../database/database.module.js";
 import { ProblemsModule } from "../problems/problems.module.js";
-import { EvaluationModule } from "../evaluation/evaluation.module.js";
+import { QueueModule } from "../queue/queue.module.js";
 import { SubmissionsController } from "./submissions.controller.js";
 import { SubmissionsService } from "./submissions.service.js";
 
 @Module({
-  imports: [ProblemsModule, EvaluationModule],
+  imports: [ProblemsModule, DatabaseModule, QueueModule],
   controllers: [SubmissionsController],
   providers: [SubmissionsService],
 })
 export class SubmissionsModule {}
-

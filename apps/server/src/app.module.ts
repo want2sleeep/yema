@@ -1,14 +1,25 @@
 import { Module } from "@nestjs/common";
+import { ConfigModule } from "@nestjs/config";
 import { HealthController } from "./common/health.controller.js";
+import { DatabaseModule } from "./database/database.module.js";
+import { QueueModule } from "./queue/queue.module.js";
 import { ProblemsModule } from "./problems/problems.module.js";
 import { SubmissionsModule } from "./submissions/submissions.module.js";
 import { EvaluationModule } from "./evaluation/evaluation.module.js";
 import { RuntimeStorageService } from "./storage/runtime-storage.service.js";
 
 @Module({
-  imports: [ProblemsModule, SubmissionsModule, EvaluationModule],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    DatabaseModule,
+    ProblemsModule,
+    EvaluationModule,
+    QueueModule,
+    SubmissionsModule,
+  ],
   controllers: [HealthController],
   providers: [RuntimeStorageService],
 })
 export class AppModule {}
-

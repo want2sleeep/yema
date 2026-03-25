@@ -1,15 +1,36 @@
 import { Injectable } from "@nestjs/common";
 import { LlmFeedback, Problem, RenderCheckResult, StaticAnalysisResult, SubmissionFile } from "@yema/shared";
+import { LlmAnalysisInput } from "./llm.types.js";
+import { OllamaProvider } from "./providers/ollama.provider.js";
 
 @Injectable()
 export class LlmAnalysisService {
+  constructor(private readonly ollamaProvider: OllamaProvider) {}
+
   async analyze(
     problem: Problem,
     files: SubmissionFile[],
     staticResult: StaticAnalysisResult,
     renderResult: RenderCheckResult,
   ): Promise<LlmFeedback> {
-    const weaknesses = [...(staticResult.lintWarnings > 0 ? ["存在规则型静态检查未通过项。"] : [])];
+    const input: LlmAnalysisInput = {
+      problem,
+      files,
+      staticResult,
+      renderResult,
+      evidence: [...staticResult.evidence, ...renderResult.evidence],
+    };
+
+    try {
+      return await this.ollamaProvider.generateFeedback(input);
+    } catch {
+      return this.buildFallbackFeedback(input);
+    }
+  }
+
+  private buildFallbackFeedback(input: LlmAnalysisInput): LlmFeedback {
+    const { problem, files, staticResult, renderResult } = input;
+    const weaknesses = [...(staticResult.lintWarnings > 0 ? ["Rule-based static checks still have warnings."] : [])];
 
     if (renderResult.missingSelectors.length > 0) {
       weaknesses.push(`Required selectors are still missing: ${renderResult.missingSelectors.join(", ")}`);

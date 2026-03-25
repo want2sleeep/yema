@@ -12,12 +12,12 @@ export class SubmissionsController {
   }
 
   @Get(":id")
-  getById(@Param("id") id: string) {
+  async getById(@Param("id") id: string) {
     return this.submissionsService.getById(id);
   }
 
   @Get(":id/report")
-  getReport(@Param("id") id: string) {
+  async getReport(@Param("id") id: string) {
     return this.submissionsService.getReport(id);
   }
 }

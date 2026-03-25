@@ -6,13 +6,12 @@ export class ProblemsController {
   constructor(private readonly problemsService: ProblemsService) {}
 
   @Get()
-  list() {
+  async list() {
     return this.problemsService.list();
   }
 
   @Get(":id")
-  getById(@Param("id") id: string) {
+  async getById(@Param("id") id: string) {
     return this.problemsService.getById(id);
   }
 }
-
