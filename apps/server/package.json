@@ -5,15 +5,24 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start:dev": "nest start --watch",
+    "start:dev": "concurrently \"npm run build:watch\" \"npm run serve:watch\"",
+    "build:watch": "nest build --watch",
+    "serve:watch": "nodemon --watch dist/apps/server/src --ext js --delay 1 --exec \"node dist/apps/server/src/main.js\"",
     "build": "nest build",
-    "lint": "tsc -p tsconfig.json --noEmit"
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "prisma:generate": "prisma generate",
+    "prisma:push": "prisma db push"
   },
   "dependencies": {
-    "@yema/shared": "*",
     "@nestjs/common": "^11.0.1",
+    "@nestjs/config": "^4.0.3",
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-fastify": "^11.0.1",
+    "@prisma/client": "^6.16.3",
+    "@yema/shared": "*",
+    "bullmq": "^5.71.1",
+    "ioredis": "^5.10.1",
+    "prisma": "^6.16.3",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"
   },
@@ -22,6 +31,8 @@
     "@nestjs/schematics": "^11.0.0",
     "@nestjs/testing": "^11.0.1",
     "@types/node": "^22.10.1",
+    "concurrently": "^9.2.1",
+    "nodemon": "^3.1.14",
     "typescript": "^5.7.2"
   }
 }

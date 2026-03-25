@@ -6,6 +6,9 @@ coverage/
 .DS_Store
 Thumbs.db
 *.log
+*.tsbuildinfo
 .env
 .env.local
 apps/server/runtime
+packages/shared/src/*.d.ts
+packages/shared/src/*.js
