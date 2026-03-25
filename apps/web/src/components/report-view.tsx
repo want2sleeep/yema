@@ -58,6 +58,47 @@ export function ReportView({ submission, report }: { submission: Submission; rep
       </article>
 
       <article className="panel report-card">
+        <h3>Render Snapshot</h3>
+        {report.artifacts?.screenshotUrl ? (
+          <div className="render-artifact">
+            <img src={report.artifacts.screenshotUrl} alt="Rendered submission screenshot" className="render-image" />
+          </div>
+        ) : (
+          <p className="muted">No screenshot artifact is available for this submission yet.</p>
+        )}
+        {report.renderDetails ? (
+          <div className="evidence-list">
+            <div className="evidence-item">
+              <strong>Render status</strong>
+              <p>{report.renderDetails.renderOk ? "Playwright checks passed" : "Playwright found render issues"}</p>
+              <p className="muted">
+                Missing selectors:{" "}
+                {report.renderDetails.missingSelectors.length > 0
+                  ? report.renderDetails.missingSelectors.join(", ")
+                  : "None"}
+              </p>
+              <p className="muted">
+                Missing text:{" "}
+                {report.renderDetails.missingTexts.length > 0
+                  ? report.renderDetails.missingTexts.join(", ")
+                  : "None"}
+              </p>
+            </div>
+            <div className="evidence-item">
+              <strong>Browser diagnostics</strong>
+              <p>{report.renderDetails.loadError ?? "Page loaded successfully in Chromium."}</p>
+              <p className="muted">
+                Console errors:{" "}
+                {report.renderDetails.consoleErrors.length > 0
+                  ? report.renderDetails.consoleErrors.join(" | ")
+                  : "None"}
+              </p>
+            </div>
+          </div>
+        ) : null}
+      </article>
+
+      <article className="panel report-card">
         <h3>Suggestions</h3>
         <div className="tips-list">
           {report.suggestions.map((tip) => (

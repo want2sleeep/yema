@@ -163,6 +163,22 @@ input {
   background: rgba(255, 255, 255, 0.72);
 }
 
+.render-artifact {
+  margin-top: 12px;
+  margin-bottom: 16px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.76);
+}
+
+.render-image {
+  display: block;
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+}
+
 .status {
   font-weight: 700;
 }

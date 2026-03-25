@@ -10,5 +10,6 @@ Thumbs.db
 .env
 .env.local
 apps/server/runtime
+runtime/
 packages/shared/src/*.d.ts
 packages/shared/src/*.js

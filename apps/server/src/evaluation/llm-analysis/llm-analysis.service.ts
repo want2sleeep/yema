@@ -35,6 +35,15 @@ export class LlmAnalysisService {
     if (renderResult.missingSelectors.length > 0) {
       weaknesses.push(`Required selectors are still missing: ${renderResult.missingSelectors.join(", ")}`);
     }
+    if (renderResult.missingTexts.length > 0) {
+      weaknesses.push(`Required text is still missing after render: ${renderResult.missingTexts.join(", ")}`);
+    }
+    if (renderResult.consoleErrors.length > 0) {
+      weaknesses.push("The browser console still reports runtime errors during page rendering.");
+    }
+    if (renderResult.loadError) {
+      weaknesses.push(`The page did not load successfully in Playwright: ${renderResult.loadError}`);
+    }
 
     return {
       summary: `Feedback was generated from rule-based evidence for "${problem.title}" across ${files.length} submitted files.`,
@@ -48,6 +57,7 @@ export class LlmAnalysisService {
           : ["No high-risk issue was found in the current placeholder analysis. Keep polishing details and maintainability."],
       nextSteps: [
         "First make sure required selectors and required text are all present.",
+        "Run the page in a browser and clear any console errors before resubmitting.",
         "Improve layout-related CSS such as centering, spacing and visual hierarchy.",
         "Replace this local feedback generator with an OpenAI-compatible provider in the next phase.",
       ],
