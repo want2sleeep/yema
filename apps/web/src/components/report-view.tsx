@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { EvaluationReport, Submission } from "@yema/shared";
+import { formatSubmissionStatus } from "../lib/submission-status";
 
 const categoryLabelMap = {
   static: "静态分析",
@@ -8,16 +9,9 @@ const categoryLabelMap = {
   system: "系统",
 } as const;
 
-const statusLabelMap = {
-  queued: "排队中",
-  running: "评测中",
-  completed: "已完成",
-  failed: "已失败",
-} as const;
-
 const textTranslationMap: Record<string, string> = {
   "This submission already forms a fairly complete page implementation and is ready for refinement.":
-    "本次提交已经完成了较为完整的页面实现，可以继续做细节优化。",
+    "本次提交已经形成了较为完整的页面实现，可以继续做细节优化。",
   "This submission completes the base flow, but still needs fixes in structure or styling.":
     "本次提交已经跑通基础流程，但在结构、样式或稳定性上仍需继续修改。",
   "Evaluates functional completion from required structure, text and rule hits.":
@@ -39,7 +33,7 @@ export function ReportView({ submission, report }: { submission: Submission; rep
       <article className="panel report-card">
         <div className="pill">提交报告</div>
         <h2>结构化评测报告</h2>
-        <p className="status">当前状态：{statusLabelMap[submission.status]}</p>
+        <p className="status">当前状态：{formatSubmissionStatus(submission.status)}</p>
         <div className="score">{report.totalScore} 分</div>
         <p className="muted">{t(report.summary)}</p>
         <div className="meta-grid">
@@ -105,15 +99,11 @@ export function ReportView({ submission, report }: { submission: Submission; rep
               <p>{report.renderDetails.renderOk ? "Playwright 检查通过" : "Playwright 发现渲染问题"}</p>
               <p className="muted">
                 缺失选择器：
-                {report.renderDetails.missingSelectors.length > 0
-                  ? report.renderDetails.missingSelectors.join(", ")
-                  : "无"}
+                {report.renderDetails.missingSelectors.length > 0 ? report.renderDetails.missingSelectors.join(", ") : "无"}
               </p>
               <p className="muted">
                 缺失文本：
-                {report.renderDetails.missingTexts.length > 0
-                  ? report.renderDetails.missingTexts.join(", ")
-                  : "无"}
+                {report.renderDetails.missingTexts.length > 0 ? report.renderDetails.missingTexts.join(", ") : "无"}
               </p>
             </div>
             <div className="evidence-item">
@@ -121,9 +111,7 @@ export function ReportView({ submission, report }: { submission: Submission; rep
               <p>{report.renderDetails.loadError ?? "页面已在 Chromium 中成功加载。"}</p>
               <p className="muted">
                 控制台错误：
-                {report.renderDetails.consoleErrors.length > 0
-                  ? report.renderDetails.consoleErrors.join(" | ")
-                  : "无"}
+                {report.renderDetails.consoleErrors.length > 0 ? report.renderDetails.consoleErrors.join(" | ") : "无"}
               </p>
             </div>
           </div>
@@ -154,3 +142,4 @@ export function ReportView({ submission, report }: { submission: Submission; rep
     </section>
   );
 }
+

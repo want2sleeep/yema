@@ -37,7 +37,7 @@ export class SubmissionsService {
         where: { id: submissionId },
         data: { status: "failed" },
       });
-      throw new ServiceUnavailableException("评测队列暂时不可用");
+      throw new ServiceUnavailableException("评测队列暂时不可用。");
     }
 
     return {
@@ -52,9 +52,23 @@ export class SubmissionsService {
         createdAt: "desc",
       },
       take: 20,
-      include: {
-        problem: true,
-        report: true,
+      select: {
+        id: true,
+        problemId: true,
+        userId: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
+        problem: {
+          select: {
+            title: true,
+          },
+        },
+        report: {
+          select: {
+            report: true,
+          },
+        },
       },
     });
 
@@ -81,7 +95,7 @@ export class SubmissionsService {
     });
 
     if (!submission) {
-      throw new NotFoundException(`未找到提交记录 ${id}`);
+      throw new NotFoundException(`未找到提交记录：${id}`);
     }
 
     return {
@@ -101,7 +115,7 @@ export class SubmissionsService {
     });
 
     if (!submission) {
-      throw new NotFoundException(`未找到提交记录 ${id}`);
+      throw new NotFoundException(`未找到提交记录：${id}`);
     }
 
     const report = await this.prismaService.evaluationReport.findUnique({
@@ -109,9 +123,10 @@ export class SubmissionsService {
     });
 
     if (!report) {
-      throw new NotFoundException(`未找到提交 ${id} 对应的报告`);
+      throw new NotFoundException(`未找到提交 ${id} 对应的评测报告。`);
     }
 
     return report.report as unknown as EvaluationReport;
   }
 }
+

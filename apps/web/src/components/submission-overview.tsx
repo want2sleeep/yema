@@ -1,16 +1,10 @@
 import Link from "next/link";
-import { SubmissionStatus, SubmissionSummary } from "@yema/shared";
-
-const statusLabelMap: Record<SubmissionStatus, string> = {
-  queued: "排队中",
-  running: "评测中",
-  completed: "已完成",
-  failed: "已失败",
-};
+import { SubmissionSummary } from "@yema/shared";
+import { formatSubmissionStatus } from "../lib/submission-status";
 
 const summaryTranslationMap: Record<string, string> = {
   "This submission already forms a fairly complete page implementation and is ready for refinement.":
-    "本次提交已经完成了较为完整的页面实现，可以继续做细节优化。",
+    "本次提交已经形成了较为完整的页面实现，可以继续做细节优化。",
   "This submission completes the base flow, but still needs fixes in structure or styling.":
     "本次提交已经跑通基础流程，但在结构、样式或稳定性上仍需继续修改。",
 };
@@ -52,7 +46,9 @@ export function SubmissionOverview({ submissions }: { submissions: SubmissionSum
                     <strong>{submission.problemTitle}</strong>
                     <p className="muted">提交编号：{submission.id}</p>
                   </div>
-                  <span className={`status-badge status-${submission.status}`}>{statusLabelMap[submission.status]}</span>
+                  <span className={`status-badge status-${submission.status}`}>
+                    {formatSubmissionStatus(submission.status)}
+                  </span>
                 </div>
                 <p className="muted">用户：{submission.userId}</p>
                 <p className="muted">提交时间：{formatDate(submission.createdAt)}</p>
