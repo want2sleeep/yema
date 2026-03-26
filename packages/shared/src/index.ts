@@ -68,6 +68,11 @@ export type StaticAnalysisResult = {
   lintWarnings: number;
   lintErrors: number;
   matchedSelectors: string[];
+  missingSelectors: string[];
+  matchedTexts: string[];
+  missingTexts: string[];
+  missingFiles: string[];
+  lintMessages: string[];
   evidence: EvidenceItem[];
 };
 

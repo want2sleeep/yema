@@ -31,6 +31,18 @@ export class LlmAnalysisService {
   private buildFallbackFeedback(input: LlmAnalysisInput): LlmFeedback {
     const { problem, files, staticResult, renderResult } = input;
     const weaknesses = [...(staticResult.lintWarnings > 0 ? ["Rule-based static checks still have warnings."] : [])];
+    if (staticResult.lintErrors > 0) {
+      weaknesses.push("Static analysis found lint errors that should be fixed before refinement.");
+    }
+    if (staticResult.missingFiles.length > 0) {
+      weaknesses.push(`Required source files are missing: ${staticResult.missingFiles.join(", ")}`);
+    }
+    if (staticResult.missingSelectors.length > 0) {
+      weaknesses.push(`Required selectors are already missing in the source AST: ${staticResult.missingSelectors.join(", ")}`);
+    }
+    if (staticResult.missingTexts.length > 0) {
+      weaknesses.push(`Required text is missing in the source AST: ${staticResult.missingTexts.join(", ")}`);
+    }
 
     if (renderResult.missingSelectors.length > 0) {
       weaknesses.push(`Required selectors are still missing: ${renderResult.missingSelectors.join(", ")}`);
