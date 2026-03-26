@@ -44,24 +44,24 @@ export function CodeWorkspace({ problem }: { problem: Problem }) {
   return (
     <section className="workspace">
       <aside className="panel sidebar">
-        <div className="pill">Problem</div>
+        <div className="pill">题目</div>
         <h2>{problem.title}</h2>
         <p className="muted">{problem.description}</p>
-        <h3>Scoring Weights</h3>
+        <h3>评分权重</h3>
         <ul>
-          <li>Correctness: {problem.config.weights.correctness}</li>
-          <li>Code Quality: {problem.config.weights.codeQuality}</li>
-          <li>UI Rendering: {problem.config.weights.uiRendering}</li>
-          <li>Engineering: {problem.config.weights.engineering}</li>
+          <li>功能正确性：{problem.config.weights.correctness}</li>
+          <li>代码质量：{problem.config.weights.codeQuality}</li>
+          <li>页面渲染：{problem.config.weights.uiRendering}</li>
+          <li>工程规范：{problem.config.weights.engineering}</li>
         </ul>
-        <h3>Required Selectors</h3>
+        <h3>必需选择器</h3>
         <ul>
           {problem.config.requiredSelectors.map((selector) => (
             <li key={selector}>{selector}</li>
           ))}
         </ul>
         <button type="button" className="button" onClick={handleSubmit} disabled={isPending}>
-          {isPending ? "Submitting..." : "Submit for Evaluation"}
+          {isPending ? "提交中..." : "提交评测"}
         </button>
       </aside>
 

@@ -6,6 +6,11 @@ import { SubmissionsService } from "./submissions.service.js";
 export class SubmissionsController {
   constructor(private readonly submissionsService: SubmissionsService) {}
 
+  @Get()
+  async list() {
+    return this.submissionsService.list();
+  }
+
   @Post()
   async create(@Body() payload: CreateSubmissionRequest) {
     return this.submissionsService.create(payload);

@@ -4,6 +4,7 @@ import {
   Problem,
   ProblemSummary,
   Submission,
+  SubmissionSummary,
 } from "@yema/shared";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3001/api";
@@ -44,6 +45,10 @@ export function createSubmission(payload: CreateSubmissionRequest) {
     method: "POST",
     body: JSON.stringify(payload),
   });
+}
+
+export function getSubmissions() {
+  return request<SubmissionSummary[]>("/submissions");
 }
 
 export function getSubmission(id: string) {

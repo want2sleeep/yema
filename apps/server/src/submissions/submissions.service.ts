@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException, ServiceUnavailableException } from "@nestjs/common";
-import { CreateSubmissionRequest, EvaluationReport, Submission } from "@yema/shared";
+import { CreateSubmissionRequest, EvaluationReport, Submission, SubmissionSummary } from "@yema/shared";
 import { randomUUID } from "node:crypto";
 import { PrismaService } from "../database/prisma.service.js";
 import { ProblemsService } from "../problems/problems.service.js";
@@ -37,7 +37,7 @@ export class SubmissionsService {
         where: { id: submissionId },
         data: { status: "failed" },
       });
-      throw new ServiceUnavailableException("Evaluation queue is currently unavailable");
+      throw new ServiceUnavailableException("评测队列暂时不可用。");
     }
 
     return {
@@ -46,13 +46,56 @@ export class SubmissionsService {
     };
   }
 
+  async list(): Promise<SubmissionSummary[]> {
+    const submissions = await this.prismaService.submission.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: 20,
+      select: {
+        id: true,
+        problemId: true,
+        userId: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
+        problem: {
+          select: {
+            title: true,
+          },
+        },
+        report: {
+          select: {
+            report: true,
+          },
+        },
+      },
+    });
+
+    return submissions.map((submission) => {
+      const report = submission.report?.report as EvaluationReport | undefined;
+
+      return {
+        id: submission.id,
+        problemId: submission.problemId,
+        problemTitle: submission.problem.title,
+        userId: submission.userId,
+        status: submission.status as Submission["status"],
+        totalScore: report?.totalScore,
+        reportSummary: report?.summary,
+        createdAt: submission.createdAt.toISOString(),
+        updatedAt: submission.updatedAt.toISOString(),
+      };
+    });
+  }
+
   async getById(id: string): Promise<Submission> {
     const submission = await this.prismaService.submission.findUnique({
       where: { id },
     });
 
     if (!submission) {
-      throw new NotFoundException(`Submission ${id} not found`);
+      throw new NotFoundException(`未找到提交记录：${id}`);
     }
 
     return {
@@ -72,7 +115,7 @@ export class SubmissionsService {
     });
 
     if (!submission) {
-      throw new NotFoundException(`Submission ${id} not found`);
+      throw new NotFoundException(`未找到提交记录：${id}`);
     }
 
     const report = await this.prismaService.evaluationReport.findUnique({
@@ -80,9 +123,10 @@ export class SubmissionsService {
     });
 
     if (!report) {
-      throw new NotFoundException(`Report for submission ${id} not found`);
+      throw new NotFoundException(`未找到提交 ${id} 对应的评测报告。`);
     }
 
     return report.report as unknown as EvaluationReport;
   }
 }
+

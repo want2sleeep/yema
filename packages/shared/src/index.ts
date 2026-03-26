@@ -48,6 +48,18 @@ export type Submission = {
   updatedAt: string;
 };
 
+export type SubmissionSummary = {
+  id: string;
+  problemId: string;
+  problemTitle: string;
+  userId: string;
+  status: SubmissionStatus;
+  totalScore?: number;
+  reportSummary?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type EvidenceItem = {
   id: string;
   category: "static" | "render" | "llm" | "system";
