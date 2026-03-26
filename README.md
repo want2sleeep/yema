@@ -4,7 +4,20 @@ MVP skeleton for an LLM-powered frontend online judge. The project targets front
 
 ## Quick start
 
-This repository uses `pnpm` workspaces.
+This repository uses `pnpm` workspaces. The repository pins the package manager version in `package.json`, so the easiest setup path is via Corepack:
+
+```bash
+corepack enable
+corepack prepare pnpm@10.18.1 --activate
+```
+
+If you prefer, you can also install pnpm globally:
+
+```bash
+npm install -g pnpm
+```
+
+Then install dependencies and start the development servers:
 
 ```bash
 pnpm install
