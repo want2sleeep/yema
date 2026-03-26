@@ -64,17 +64,17 @@ export class OllamaProvider implements LlmProvider {
     const codeSummary = input.files.map((file) => `${file.path}\n${file.content}`).join("\n\n");
 
     return [
-      "You are generating structured teaching feedback for a frontend online judge.",
-      "Return strict JSON with keys: summary, strengths, weaknesses, nextSteps, riskFlags.",
-      "Do not include markdown fences or any extra text.",
+      "你正在为一个前端在线判题系统生成结构化教学反馈。",
+      "请返回严格 JSON，包含键：summary、strengths、weaknesses、nextSteps、riskFlags。",
+      "所有字段内容请使用简体中文，不要输出 Markdown 代码块或额外解释。",
       "",
-      `Problem title: ${input.problem.title}`,
-      `Problem description: ${input.problem.description}`,
-      `Required selectors: ${input.problem.config.requiredSelectors.join(", ")}`,
-      `Required texts: ${input.problem.config.requiredTexts.join(", ")}`,
+      `题目名称：${input.problem.title}`,
+      `题目描述：${input.problem.description}`,
+      `必需选择器：${input.problem.config.requiredSelectors.join(", ")}`,
+      `必需文本：${input.problem.config.requiredTexts.join(", ")}`,
       "",
-      `Static result: ${JSON.stringify(input.staticResult)}`,
-      `Render result: ${JSON.stringify({
+      `静态分析结果：${JSON.stringify(input.staticResult)}`,
+      `渲染分析结果：${JSON.stringify({
         renderOk: input.renderResult.renderOk,
         consoleErrors: input.renderResult.consoleErrors,
         missingSelectors: input.renderResult.missingSelectors,
@@ -82,10 +82,10 @@ export class OllamaProvider implements LlmProvider {
         matchedTexts: input.renderResult.matchedTexts,
         loadError: input.renderResult.loadError,
       })}`,
-      `Evidence: ${JSON.stringify(input.evidence)}`,
-      `Lint messages: ${JSON.stringify(input.staticResult.lintMessages)}`,
+      `证据项：${JSON.stringify(input.evidence)}`,
+      `Lint 消息：${JSON.stringify(input.staticResult.lintMessages)}`,
       "",
-      "Student files:",
+      "学生提交文件：",
       codeSummary,
     ].join("\n");
   }

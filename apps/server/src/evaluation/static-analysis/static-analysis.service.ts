@@ -62,8 +62,8 @@ export class StaticAnalysisService {
         evidence.push({
           id: "static-html-parse-error",
           category: "static",
-          title: "HTML parse failed",
-          detail: "The submitted HTML could not be traversed as a structured document tree.",
+          title: "HTML 解析失败",
+          detail: "提交的 HTML 无法被解析为结构化文档树。",
           severity: "error",
           scoreImpact: -12,
         });
@@ -74,8 +74,8 @@ export class StaticAnalysisService {
       evidence.push({
         id: "static-missing-files",
         category: "static",
-        title: "Required files are missing",
-        detail: `Missing required editable files: ${missingFiles.join(", ")}`,
+        title: "缺少必需文件",
+        detail: `缺少以下必需可编辑文件：${missingFiles.join(", ")}`,
         severity: "error",
         scoreImpact: -12,
       });
@@ -85,8 +85,8 @@ export class StaticAnalysisService {
       evidence.push({
         id: "static-missing-text",
         category: "static",
-        title: "Missing required text",
-        detail: `The following text was not found in the parsed HTML tree: ${missingTexts.join(", ")}`,
+        title: "缺少必需文本",
+        detail: `在 HTML 结构树中未找到以下必需文本：${missingTexts.join(", ")}`,
         severity: "warning",
         scoreImpact: -8,
       });
@@ -94,8 +94,8 @@ export class StaticAnalysisService {
       evidence.push({
         id: "static-text-ok",
         category: "static",
-        title: "Required text matched",
-        detail: "All required phrases are present in the parsed HTML structure.",
+        title: "必需文本已命中",
+        detail: "所有必需文本都已出现在解析后的 HTML 结构中。",
         severity: "info",
         scoreImpact: 4,
       });
@@ -105,8 +105,8 @@ export class StaticAnalysisService {
       evidence.push({
         id: "static-missing-selectors",
         category: "static",
-        title: "Required selectors are missing in source",
-        detail: `The following selectors were not found in the HTML AST: ${missingSelectors.join(", ")}`,
+        title: "源码中缺少必需选择器",
+        detail: `在 HTML AST 中未找到以下选择器：${missingSelectors.join(", ")}`,
         severity: "warning",
         scoreImpact: -8,
       });
@@ -114,8 +114,8 @@ export class StaticAnalysisService {
       evidence.push({
         id: "static-selectors-ok",
         category: "static",
-        title: "Required selectors found in source",
-        detail: "The HTML AST already contains all required selectors before browser rendering.",
+        title: "源码中已包含必需选择器",
+        detail: "在浏览器渲染之前，HTML AST 中已包含全部必需选择器。",
         severity: "info",
         scoreImpact: 4,
       });
@@ -125,8 +125,8 @@ export class StaticAnalysisService {
       evidence.push({
         id: "static-style-weak",
         category: "static",
-        title: "Weak layout styling",
-        detail: "No common layout declaration was found in CSS, so the page may still look unfinished.",
+        title: "布局样式较弱",
+        detail: "CSS 中缺少常见的布局声明，页面可能还不够完整。",
         severity: "warning",
         scoreImpact: -6,
       });
@@ -155,7 +155,7 @@ export class StaticAnalysisService {
           evidence.push({
             id: `static-lint-${lintMessages.length}`,
             category: "static",
-            title: message.severity === 2 ? "ESLint error" : "ESLint warning",
+            title: message.severity === 2 ? "ESLint 错误" : "ESLint 警告",
             detail: normalized,
             severity: message.severity === 2 ? "error" : "warning",
             scoreImpact: message.severity === 2 ? -6 : -3,
@@ -169,8 +169,8 @@ export class StaticAnalysisService {
       evidence.push({
         id: "static-lint-skipped",
         category: "static",
-        title: "No JavaScript lint target provided",
-        detail: "This submission contains only HTML/CSS files, so ESLint checks were skipped.",
+        title: "未提供 JavaScript lint 目标",
+        detail: "当前提交仅包含 HTML/CSS 文件，因此跳过了 ESLint 检查。",
         severity: "info",
         scoreImpact: 0,
       });

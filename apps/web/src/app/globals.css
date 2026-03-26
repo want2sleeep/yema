@@ -49,6 +49,13 @@ input {
   margin-bottom: 24px;
 }
 
+.header-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 .panel {
   background: var(--panel);
   border: 1px solid var(--line);
@@ -183,8 +190,70 @@ input {
   font-weight: 700;
 }
 
+.submission-list {
+  display: grid;
+  gap: 16px;
+}
+
+.submission-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.76);
+}
+
+.submission-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.submission-actions {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.status-queued {
+  background: #efe2b8;
+  color: #7f5a00;
+}
+
+.status-running {
+  background: #dbe8f6;
+  color: #23527c;
+}
+
+.status-completed {
+  background: #d8ead8;
+  color: #1e6b34;
+}
+
+.status-failed {
+  background: #f5d6d6;
+  color: #8a2d2d;
+}
+
 @media (max-width: 960px) {
   .workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .submission-item {
     grid-template-columns: 1fr;
   }
 }

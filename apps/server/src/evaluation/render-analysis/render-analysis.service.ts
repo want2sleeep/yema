@@ -33,17 +33,17 @@ export class RenderAnalysisService {
         renderOk: false,
         screenshotPath,
         screenshotUrl,
-        consoleErrors: ["No HTML entry file was submitted for browser rendering."],
+        consoleErrors: ["未提交 HTML 入口文件，无法进行浏览器渲染。"],
         missingSelectors: [...problem.config.requiredSelectors],
         matchedTexts: [],
         missingTexts: [...problem.config.requiredTexts],
-        loadError: "Missing HTML entry file",
+        loadError: "缺少 HTML 入口文件",
         evidence: [
           {
             id: "render-entry-missing",
             category: "render",
-            title: "Browser render skipped",
-            detail: "The submission does not contain an HTML entry file, so Playwright could not load the page.",
+            title: "浏览器渲染已跳过",
+            detail: "提交内容中没有 HTML 入口文件，因此 Playwright 无法加载页面。",
             severity: "error",
             scoreImpact: -18,
           },
@@ -83,7 +83,7 @@ export class RenderAnalysisService {
         fullPage: true,
       });
     } catch (error) {
-      loadError = error instanceof Error ? error.message : "Unknown Playwright load error";
+      loadError = error instanceof Error ? error.message : "未知的 Playwright 页面加载错误";
     }
 
     let missingSelectors = [...problem.config.requiredSelectors];
@@ -141,8 +141,8 @@ export class RenderAnalysisService {
       evidence.push({
         id: "render-load-failed",
         category: "render",
-        title: "Page failed to load in browser",
-        detail: `Playwright could not load the generated page: ${loadError}`,
+        title: "页面加载失败",
+        detail: `Playwright 无法加载生成后的页面：${loadError}`,
         severity: "error",
         scoreImpact: -16,
       });
@@ -152,11 +152,11 @@ export class RenderAnalysisService {
     evidence.push({
       id: "render-dom-check",
       category: "render",
-      title: missingSelectors.length === 0 ? "Required selectors rendered" : "Required selectors missing after render",
+      title: missingSelectors.length === 0 ? "必需选择器已渲染" : "渲染后缺少必需选择器",
       detail:
         missingSelectors.length === 0
-          ? "All required selectors were found in the browser-rendered DOM."
-          : `Missing required selectors after render: ${missingSelectors.join(", ")}`,
+          ? "在浏览器渲染后的 DOM 中找到了所有必需选择器。"
+          : `渲染后缺少以下必需选择器：${missingSelectors.join(", ")}`,
       severity: missingSelectors.length === 0 ? "info" : "warning",
       scoreImpact: missingSelectors.length === 0 ? 10 : -10,
     });
@@ -164,11 +164,11 @@ export class RenderAnalysisService {
     evidence.push({
       id: "render-text-check",
       category: "render",
-      title: missingTexts.length === 0 ? "Required text rendered" : "Required text missing after render",
+      title: missingTexts.length === 0 ? "必需文本已渲染" : "渲染后缺少必需文本",
       detail:
         missingTexts.length === 0
-          ? "All required text snippets appeared in the rendered page."
-          : `Missing required text after render: ${missingTexts.join(", ")}`,
+          ? "所有必需文本都已经出现在渲染后的页面中。"
+          : `渲染后缺少以下必需文本：${missingTexts.join(", ")}`,
       severity: missingTexts.length === 0 ? "info" : "warning",
       scoreImpact: missingTexts.length === 0 ? 6 : -8,
     });
@@ -177,8 +177,8 @@ export class RenderAnalysisService {
       evidence.push({
         id: "render-console-errors",
         category: "render",
-        title: "Browser console reported errors",
-        detail: `Console errors during rendering: ${consoleErrors.join(" | ")}`,
+        title: "浏览器控制台存在错误",
+        detail: `渲染期间捕获到以下控制台错误：${consoleErrors.join(" | ")}`,
         severity: "warning",
         scoreImpact: -6,
       });
@@ -186,8 +186,8 @@ export class RenderAnalysisService {
       evidence.push({
         id: "render-console-clean",
         category: "render",
-        title: "Browser console stayed clean",
-        detail: "No console or page errors were captured during browser rendering.",
+        title: "浏览器控制台无异常",
+        detail: "浏览器渲染期间未捕获到控制台错误或页面错误。",
         severity: "info",
         scoreImpact: 2,
       });

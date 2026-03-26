@@ -5,6 +5,13 @@ import { EvaluationReport, Submission } from "@yema/shared";
 import { getSubmission, tryGetReport } from "../lib/api";
 import { ReportView } from "./report-view";
 
+const statusLabelMap = {
+  queued: "排队中",
+  running: "评测中",
+  completed: "已完成",
+  failed: "已失败",
+} as const;
+
 export function SubmissionReportScreen({ submissionId }: { submissionId: string }) {
   const [submission, setSubmission] = useState<Submission | null>(null);
   const [report, setReport] = useState<EvaluationReport | null>(null);
@@ -57,8 +64,8 @@ export function SubmissionReportScreen({ submissionId }: { submissionId: string 
   if (error) {
     return (
       <section className="panel report-card">
-        <div className="pill">Submission</div>
-        <h2>Evaluation Status</h2>
+        <div className="pill">提交状态</div>
+        <h2>评测异常</h2>
         <p className="muted">{error}</p>
       </section>
     );
@@ -67,11 +74,11 @@ export function SubmissionReportScreen({ submissionId }: { submissionId: string 
   if (!submission || !report) {
     return (
       <section className="panel report-card">
-        <div className="pill">Submission</div>
-        <h2>Evaluation in Progress</h2>
-        <p className="status">Current status: {submission?.status ?? "queued"}</p>
+        <div className="pill">提交状态</div>
+        <h2>评测进行中</h2>
+        <p className="status">当前状态：{statusLabelMap[submission?.status ?? "queued"]}</p>
         <p className="muted">
-          The submission has been stored and queued. This page is polling until the structured report is ready.
+          提交已经保存并进入评测队列，页面会持续轮询，直到结构化报告生成完成。
         </p>
       </section>
     );

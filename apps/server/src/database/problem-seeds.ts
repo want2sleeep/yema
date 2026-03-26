@@ -3,17 +3,16 @@ import { Problem } from "@yema/shared";
 export const problemSeeds: Problem[] = [
   {
     id: "login-card",
-    title: "Build a Login Card",
+    title: "实现登录卡片页面",
     difficulty: "easy",
-    shortDescription: "Create a centered login card with a title, two inputs and a submit button.",
-    description:
-      "Implement a centered login card page. The page must include a title, username input, password input and a login button.",
+    shortDescription: "实现一个居中的登录卡片，包含标题、两个输入框和一个提交按钮。",
+    description: "实现一个居中的登录卡片页面，页面中必须包含标题、用户名输入框、密码输入框和登录按钮。",
     templateFiles: [
       {
         path: "index.html",
         language: "html",
         content:
-          "<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n    <title>Login Card</title>\n    <link rel=\"stylesheet\" href=\"styles.css\" />\n  </head>\n  <body>\n    <main class=\"page\">\n      <section class=\"card\" id=\"login-card\">\n        <h1>Welcome Back</h1>\n        <form class=\"form\">\n          <input type=\"text\" placeholder=\"Username\" />\n          <input type=\"password\" placeholder=\"Password\" />\n          <button type=\"submit\">Log in</button>\n        </form>\n      </section>\n    </main>\n  </body>\n</html>\n",
+          "<!DOCTYPE html>\n<html lang=\"zh-CN\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n    <title>登录卡片</title>\n    <link rel=\"stylesheet\" href=\"styles.css\" />\n  </head>\n  <body>\n    <main class=\"page\">\n      <section class=\"card\" id=\"login-card\">\n        <h1>欢迎回来</h1>\n        <form class=\"form\">\n          <input type=\"text\" placeholder=\"用户名\" />\n          <input type=\"password\" placeholder=\"密码\" />\n          <button type=\"submit\">立即登录</button>\n        </form>\n      </section>\n    </main>\n  </body>\n</html>\n",
       },
       {
         path: "styles.css",
@@ -28,7 +27,7 @@ export const problemSeeds: Problem[] = [
           path: "index.html",
           language: "html",
           content:
-            "<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n    <title>Login Card</title>\n    <link rel=\"stylesheet\" href=\"styles.css\" />\n  </head>\n  <body>\n    <main class=\"page\">\n      <section class=\"card\" id=\"login-card\">\n        <h1>Welcome Back</h1>\n        <form class=\"form\">\n          <input type=\"text\" placeholder=\"Username\" />\n          <input type=\"password\" placeholder=\"Password\" />\n          <button type=\"submit\">Log in</button>\n        </form>\n      </section>\n    </main>\n  </body>\n</html>\n",
+            "<!DOCTYPE html>\n<html lang=\"zh-CN\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n    <title>登录卡片</title>\n    <link rel=\"stylesheet\" href=\"styles.css\" />\n  </head>\n  <body>\n    <main class=\"page\">\n      <section class=\"card\" id=\"login-card\">\n        <h1>欢迎回来</h1>\n        <form class=\"form\">\n          <input type=\"text\" placeholder=\"用户名\" />\n          <input type=\"password\" placeholder=\"密码\" />\n          <button type=\"submit\">立即登录</button>\n        </form>\n      </section>\n    </main>\n  </body>\n</html>\n",
         },
         {
           path: "styles.css",
@@ -38,7 +37,7 @@ export const problemSeeds: Problem[] = [
         },
       ],
       requiredSelectors: ["#login-card", ".form", "button"],
-      requiredTexts: ["Welcome Back", "Log in"],
+      requiredTexts: ["欢迎回来", "立即登录"],
       weights: {
         correctness: 35,
         codeQuality: 20,
@@ -49,17 +48,16 @@ export const problemSeeds: Problem[] = [
   },
   {
     id: "todo-board",
-    title: "Build a Todo Board",
+    title: "实现待办事项面板",
     difficulty: "medium",
-    shortDescription: "Create a Todo page with a composer area and a task list section.",
-    description:
-      "Implement a simple Todo page with a title, input field, add button and a list area for tasks.",
+    shortDescription: "实现一个待办事项页面，包含输入区、添加按钮和任务列表区域。",
+    description: "实现一个简单的待办事项页面，页面中需要包含标题、输入框、添加按钮以及任务列表区域。",
     templateFiles: [
       {
         path: "index.html",
         language: "html",
         content:
-          "<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n    <title>Todo Board</title>\n    <link rel=\"stylesheet\" href=\"styles.css\" />\n  </head>\n  <body>\n    <main class=\"todo-page\">\n      <section class=\"todo-card\">\n        <h1>Todo Board</h1>\n        <div class=\"composer\">\n          <input type=\"text\" placeholder=\"Add a task\" />\n          <button>Add Task</button>\n        </div>\n        <ul class=\"todo-list\">\n          <li>Example Task</li>\n        </ul>\n      </section>\n    </main>\n  </body>\n</html>\n",
+          "<!DOCTYPE html>\n<html lang=\"zh-CN\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n    <title>待办事项面板</title>\n    <link rel=\"stylesheet\" href=\"styles.css\" />\n  </head>\n  <body>\n    <main class=\"todo-page\">\n      <section class=\"todo-card\">\n        <h1>待办事项</h1>\n        <div class=\"composer\">\n          <input type=\"text\" placeholder=\"添加一条待办\" />\n          <button>添加任务</button>\n        </div>\n        <ul class=\"todo-list\">\n          <li>示例任务</li>\n        </ul>\n      </section>\n    </main>\n  </body>\n</html>\n",
       },
       {
         path: "styles.css",
@@ -74,7 +72,7 @@ export const problemSeeds: Problem[] = [
           path: "index.html",
           language: "html",
           content:
-            "<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n    <title>Todo Board</title>\n    <link rel=\"stylesheet\" href=\"styles.css\" />\n  </head>\n  <body>\n    <main class=\"todo-page\">\n      <section class=\"todo-card\">\n        <h1>Todo Board</h1>\n        <div class=\"composer\">\n          <input type=\"text\" placeholder=\"Add a task\" />\n          <button>Add Task</button>\n        </div>\n        <ul class=\"todo-list\">\n          <li>Example Task</li>\n        </ul>\n      </section>\n    </main>\n  </body>\n</html>\n",
+            "<!DOCTYPE html>\n<html lang=\"zh-CN\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n    <title>待办事项面板</title>\n    <link rel=\"stylesheet\" href=\"styles.css\" />\n  </head>\n  <body>\n    <main class=\"todo-page\">\n      <section class=\"todo-card\">\n        <h1>待办事项</h1>\n        <div class=\"composer\">\n          <input type=\"text\" placeholder=\"添加一条待办\" />\n          <button>添加任务</button>\n        </div>\n        <ul class=\"todo-list\">\n          <li>示例任务</li>\n        </ul>\n      </section>\n    </main>\n  </body>\n</html>\n",
         },
         {
           path: "styles.css",
@@ -84,7 +82,7 @@ export const problemSeeds: Problem[] = [
         },
       ],
       requiredSelectors: [".composer", ".todo-list", "button"],
-      requiredTexts: ["Todo Board", "Add Task"],
+      requiredTexts: ["待办事项", "添加任务"],
       weights: {
         correctness: 35,
         codeQuality: 20,

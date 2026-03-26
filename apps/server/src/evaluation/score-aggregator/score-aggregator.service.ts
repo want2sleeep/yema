@@ -53,28 +53,28 @@ export class ScoreAggregatorService {
       totalScore,
       summary:
         totalScore >= 85
-          ? "This submission already forms a fairly complete page implementation and is ready for refinement."
-          : "This submission completes the base flow, but still needs fixes in structure or styling.",
+          ? "本次提交已经完成了较为完整的页面实现，可以继续做细节优化。"
+          : "本次提交已经跑通基础流程，但在结构、样式或稳定性上仍需继续修改。",
       dimensions: {
         correctness: {
           score: correctnessScore,
           maxScore: problem.config.weights.correctness,
-          summary: "Evaluates functional completion from required structure, text and rule hits.",
+          summary: "根据必需结构、文本命中情况和规则命中情况评估功能完成度。",
         },
         codeQuality: {
           score: codeQualityScore,
           maxScore: problem.config.weights.codeQuality,
-          summary: "Evaluates code quality from static checks and template compliance.",
+          summary: "根据静态分析、ESLint 与模板符合度评估代码质量。",
         },
         uiRendering: {
           score: uiRenderingScore,
           maxScore: problem.config.weights.uiRendering,
-          summary: "Evaluates browser rendering, DOM checks, text checks and screenshot evidence.",
+          summary: "根据浏览器渲染结果、DOM 检查、文本检查和截图证据评估页面表现。",
         },
         engineering: {
           score: engineeringScore,
           maxScore: problem.config.weights.engineering,
-          summary: "Evaluates file completeness and submission hygiene.",
+          summary: "根据文件完整性、运行稳定性和提交规范评估工程规范。",
         },
       },
       evidence: [...staticResult.evidence, ...renderResult.evidence],
