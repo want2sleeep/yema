@@ -56,6 +56,8 @@ export class RenderAnalysisService {
     let missingSelectors = [...problem.config.requiredSelectors];
     let matchedTexts: string[] = [];
     let missingTexts = [...problem.config.requiredTexts];
+    let selectorMatches = new Map<string, boolean>();
+    let textMatches = new Map<string, boolean>();
 
     try {
       const page = await browser.newPage({
@@ -87,18 +89,38 @@ export class RenderAnalysisService {
         });
         screenshotUrl = this.runtimeStorageService.getArtifactUrl(submissionId, screenshotFilename);
 
+        const selectorTargets = Array.from(
+          new Set([
+            ...problem.config.requiredSelectors,
+            ...problem.config.evaluationRules
+              .filter((rule) => rule.engine === "render" && rule.type === "selector" && rule.target)
+              .map((rule) => rule.target as string),
+          ]),
+        );
+
         const selectorChecks = await Promise.all(
-          problem.config.requiredSelectors.map(async (selector) => ({
+          selectorTargets.map(async (selector) => ({
             selector,
             found: (await page.locator(selector).count()) > 0,
           })),
         );
 
-        missingSelectors = selectorChecks.filter((item) => !item.found).map((item) => item.selector);
+        selectorMatches = new Map(selectorChecks.map((item) => [item.selector, item.found]));
+        missingSelectors = problem.config.requiredSelectors.filter((selector) => !selectorMatches.get(selector));
 
         const bodyText = (await page.locator("body").textContent()) ?? "";
+        const textTargets = Array.from(
+          new Set([
+            ...problem.config.requiredTexts,
+            ...problem.config.evaluationRules
+              .filter((rule) => rule.engine === "render" && rule.type === "text" && rule.target)
+              .map((rule) => rule.target as string),
+          ]),
+        );
+
+        textMatches = new Map(textTargets.map((text) => [text, bodyText.includes(text)]));
         matchedTexts = problem.config.requiredTexts.filter((text) => bodyText.includes(text));
-        missingTexts = problem.config.requiredTexts.filter((text) => !bodyText.includes(text));
+        missingTexts = problem.config.requiredTexts.filter((text) => !textMatches.get(text));
       } catch (error) {
         loadError = error instanceof Error ? error.message : "未知的 Playwright 页面加载错误";
       } finally {
@@ -109,7 +131,7 @@ export class RenderAnalysisService {
     }
 
     const allConsoleErrors = [...consoleErrors, ...pageErrors];
-    const evidence = this.buildEvidence(problem, missingSelectors, missingTexts, allConsoleErrors, loadError);
+    const evidence = this.buildEvidence(problem, missingSelectors, missingTexts, selectorMatches, textMatches, allConsoleErrors, loadError);
 
     return {
       renderOk: !loadError && missingSelectors.length === 0 && missingTexts.length === 0,
@@ -128,6 +150,8 @@ export class RenderAnalysisService {
     problem: Problem,
     missingSelectors: string[],
     missingTexts: string[],
+    selectorMatches: Map<string, boolean>,
+    textMatches: Map<string, boolean>,
     consoleErrors: string[],
     loadError?: string,
   ): EvidenceItem[] {
@@ -148,8 +172,8 @@ export class RenderAnalysisService {
 
     for (const rule of problem.config.evaluationRules.filter((item) => item.engine === "render")) {
       const result = this.evaluateRenderRule(rule, {
-        missingSelectors,
-        missingTexts,
+        selectorMatches,
+        textMatches,
         consoleErrors,
       });
 
@@ -184,17 +208,17 @@ export class RenderAnalysisService {
   private evaluateRenderRule(
     rule: ProblemEvaluationRule,
     input: {
-      missingSelectors: string[];
-      missingTexts: string[];
+      selectorMatches: Map<string, boolean>;
+      textMatches: Map<string, boolean>;
       consoleErrors: string[];
     },
   ) {
     if (rule.type === "selector" && rule.target) {
-      return this.buildRuleEvidence(rule, !input.missingSelectors.includes(rule.target));
+      return this.buildRuleEvidence(rule, input.selectorMatches.get(rule.target) === true);
     }
 
     if (rule.type === "text" && rule.target) {
-      return this.buildRuleEvidence(rule, !input.missingTexts.includes(rule.target));
+      return this.buildRuleEvidence(rule, input.textMatches.get(rule.target) === true);
     }
 
     if (rule.type === "console") {

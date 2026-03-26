@@ -56,10 +56,12 @@ export class StaticAnalysisService {
     let missingTexts = [...problem.config.requiredTexts];
     let syntaxOk = Boolean(htmlFile && cssFile);
     let htmlParsed = false;
+    let htmlDocument: HtmlNode | undefined;
 
     if (htmlFile) {
       try {
         const document = parse(htmlContent);
+        htmlDocument = document;
         htmlParsed = true;
         matchedSelectors = problem.config.requiredSelectors.filter((selector) => this.containsSelector(document, selector));
         missingSelectors = problem.config.requiredSelectors.filter((selector) => !matchedSelectors.includes(selector));
@@ -90,9 +92,7 @@ export class StaticAnalysisService {
       const result = this.evaluateStaticRule(rule, {
         files,
         cssContent,
-        htmlParsed,
-        matchedSelectors,
-        matchedTexts,
+        htmlDocument,
       });
 
       if (!result) {
@@ -189,9 +189,7 @@ export class StaticAnalysisService {
     input: {
       files: SubmissionFile[];
       cssContent: string;
-      htmlParsed: boolean;
-      matchedSelectors: string[];
-      matchedTexts: string[];
+      htmlDocument?: HtmlNode;
     },
   ) {
     if (rule.type === "file" && rule.target) {
@@ -207,16 +205,16 @@ export class StaticAnalysisService {
       return this.buildRuleEvidence(rule, passed);
     }
 
-    if (!input.htmlParsed) {
+    if (!input.htmlDocument) {
       return undefined;
     }
 
     if (rule.type === "selector" && rule.target) {
-      return this.buildRuleEvidence(rule, input.matchedSelectors.includes(rule.target));
+      return this.buildRuleEvidence(rule, this.containsSelector(input.htmlDocument, rule.target));
     }
 
     if (rule.type === "text" && rule.target) {
-      return this.buildRuleEvidence(rule, input.matchedTexts.includes(rule.target));
+      return this.buildRuleEvidence(rule, this.containsText(input.htmlDocument, rule.target));
     }
 
     return undefined;

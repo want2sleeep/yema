@@ -57,8 +57,8 @@ export function CodeWorkspace({ problem }: { problem: Problem }) {
 
         <h3>完成要求</h3>
         <ul>
-          {problem.config.requirements.map((item) => (
-            <li key={item}>{item}</li>
+          {problem.config.requirements.map((item, index) => (
+            <li key={`${index}-${item}`}>{item}</li>
           ))}
         </ul>
 
