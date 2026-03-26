@@ -16,7 +16,13 @@ export class OllamaProvider implements LlmProvider {
     const prompt = this.buildPrompt(input);
     const baseUrl = this.configService.get<string>("OLLAMA_BASE_URL") ?? "http://127.0.0.1:11434";
     const model = this.configService.get<string>("OLLAMA_MODEL") ?? "qwen3.5:4b";
-    const timeoutMs = Number(this.configService.get<string>("OLLAMA_TIMEOUT_MS") ?? "15000");
+    const timeoutConfig = this.configService.get<string>("OLLAMA_TIMEOUT_MS");
+    let timeoutMs = Number(timeoutConfig ?? "15000");
+
+    if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
+      timeoutMs = 15000;
+    }
+
     const abortController = new AbortController();
     const timeout = setTimeout(() => abortController.abort(), timeoutMs);
 

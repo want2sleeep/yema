@@ -49,10 +49,12 @@ export class StaticAnalysisService {
     let matchedTexts: string[] = [];
     let missingTexts = [...problem.config.requiredTexts];
     let syntaxOk = Boolean(htmlFile && cssFile);
+    let htmlParsed = false;
 
     if (htmlFile) {
       try {
         const document = parse(htmlContent);
+        htmlParsed = true;
         matchedSelectors = problem.config.requiredSelectors.filter((selector) => this.containsSelector(document, selector));
         missingSelectors = problem.config.requiredSelectors.filter((selector) => !matchedSelectors.includes(selector));
         matchedTexts = problem.config.requiredTexts.filter((text) => this.containsText(document, text));
@@ -70,6 +72,13 @@ export class StaticAnalysisService {
       }
     }
 
+    if (!htmlParsed) {
+      matchedSelectors = [];
+      missingSelectors = [];
+      matchedTexts = [];
+      missingTexts = [];
+    }
+
     if (missingFiles.length > 0) {
       evidence.push({
         id: "static-missing-files",
@@ -81,47 +90,60 @@ export class StaticAnalysisService {
       });
     }
 
-    if (missingTexts.length > 0) {
-      evidence.push({
-        id: "static-missing-text",
-        category: "static",
-        title: "Missing required text",
-        detail: `The following text was not found in the parsed HTML tree: ${missingTexts.join(", ")}`,
-        severity: "warning",
-        scoreImpact: -8,
-      });
+    if (htmlParsed) {
+      if (missingTexts.length > 0) {
+        evidence.push({
+          id: "static-missing-text",
+          category: "static",
+          title: "Missing required text",
+          detail: `The following text was not found in the parsed HTML tree: ${missingTexts.join(", ")}`,
+          severity: "warning",
+          scoreImpact: -8,
+        });
+      } else {
+        evidence.push({
+          id: "static-text-ok",
+          category: "static",
+          title: "Required text matched",
+          detail: "All required phrases are present in the parsed HTML structure.",
+          severity: "info",
+          scoreImpact: 4,
+        });
+      }
+
+      if (missingSelectors.length > 0) {
+        evidence.push({
+          id: "static-missing-selectors",
+          category: "static",
+          title: "Required selectors are missing in source",
+          detail: `The following selectors were not found in the HTML AST: ${missingSelectors.join(", ")}`,
+          severity: "warning",
+          scoreImpact: -8,
+        });
+      } else {
+        evidence.push({
+          id: "static-selectors-ok",
+          category: "static",
+          title: "Required selectors found in source",
+          detail: "The HTML AST already contains all required selectors before browser rendering.",
+          severity: "info",
+          scoreImpact: 4,
+        });
+      }
     } else {
       evidence.push({
-        id: "static-text-ok",
+        id: "static-html-checks-skipped",
         category: "static",
-        title: "Required text matched",
-        detail: "All required phrases are present in the parsed HTML structure.",
-        severity: "info",
-        scoreImpact: 4,
+        title: "HTML structure checks skipped",
+        detail: htmlFile
+          ? "HTML parsing failed, so selector/text AST checks were skipped."
+          : "No HTML file was provided, so selector/text AST checks were skipped.",
+        severity: "warning",
+        scoreImpact: -4,
       });
     }
 
-    if (missingSelectors.length > 0) {
-      evidence.push({
-        id: "static-missing-selectors",
-        category: "static",
-        title: "Required selectors are missing in source",
-        detail: `The following selectors were not found in the HTML AST: ${missingSelectors.join(", ")}`,
-        severity: "warning",
-        scoreImpact: -8,
-      });
-    } else {
-      evidence.push({
-        id: "static-selectors-ok",
-        category: "static",
-        title: "Required selectors found in source",
-        detail: "The HTML AST already contains all required selectors before browser rendering.",
-        severity: "info",
-        scoreImpact: 4,
-      });
-    }
-
-    if (!cssContent.includes("display")) {
+    if (cssFile && !cssContent.includes("display")) {
       evidence.push({
         id: "static-style-weak",
         category: "static",

@@ -1,5 +1,4 @@
 import { Injectable } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
 import { chromium } from "playwright";
 import { pathToFileURL } from "node:url";
 import { join } from "node:path";
@@ -8,18 +7,12 @@ import { RuntimeStorageService } from "../../storage/runtime-storage.service.js"
 
 @Injectable()
 export class RenderAnalysisService {
-  constructor(
-    private readonly runtimeStorageService: RuntimeStorageService,
-    private readonly configService: ConfigService,
-  ) {}
+  constructor(private readonly runtimeStorageService: RuntimeStorageService) {}
 
   async analyze(problem: Problem, submissionId: string, files: SubmissionFile[]): Promise<RenderCheckResult> {
-    const reportDir = await this.runtimeStorageService.ensureDir(`reports/${submissionId}`);
+    const reportDir = await this.runtimeStorageService.ensureReportDir(submissionId);
     const screenshotFilename = "render.png";
     const screenshotPath = join(reportDir, screenshotFilename);
-    const screenshotUrl = this.toAbsoluteArtifactUrl(
-      this.runtimeStorageService.getArtifactUrl(submissionId, screenshotFilename),
-    );
     const consoleErrors: string[] = [];
     const pageErrors: string[] = [];
 
@@ -31,8 +24,6 @@ export class RenderAnalysisService {
     if (!htmlFile) {
       return {
         renderOk: false,
-        screenshotPath,
-        screenshotUrl,
         consoleErrors: ["No HTML entry file was submitted for browser rendering."],
         missingSelectors: [...problem.config.requiredSelectors],
         matchedTexts: [],
@@ -53,67 +44,69 @@ export class RenderAnalysisService {
 
     const entryPath = join(workspaceDir, htmlFile.path);
     const browser = await chromium.launch({ headless: true });
-    const page = await browser.newPage({
-      viewport: {
-        width: 1440,
-        height: 960,
-      },
-    });
-
-    page.on("console", (message) => {
-      if (message.type() === "error") {
-        consoleErrors.push(message.text());
-      }
-    });
-
-    page.on("pageerror", (error) => {
-      pageErrors.push(error.message);
-    });
-
+    let screenshotUrl: string | undefined;
     let loadError: string | undefined;
-
-    try {
-      await page.goto(pathToFileURL(entryPath).toString(), {
-        waitUntil: "load",
-        timeout: 5000,
-      });
-      await page.waitForTimeout(250);
-      await page.screenshot({
-        path: screenshotPath,
-        fullPage: true,
-      });
-    } catch (error) {
-      loadError = error instanceof Error ? error.message : "Unknown Playwright load error";
-    }
-
     let missingSelectors = [...problem.config.requiredSelectors];
     let matchedTexts: string[] = [];
     let missingTexts = [...problem.config.requiredTexts];
 
-    if (!loadError) {
-      const selectorChecks = await Promise.all(
-        problem.config.requiredSelectors.map(async (selector) => ({
-          selector,
-          found: (await page.locator(selector).count()) > 0,
-        })),
-      );
+    try {
+      const page = await browser.newPage({
+        viewport: {
+          width: 1440,
+          height: 960,
+        },
+      });
 
-      missingSelectors = selectorChecks.filter((item) => !item.found).map((item) => item.selector);
+      page.on("console", (message) => {
+        if (message.type() === "error") {
+          consoleErrors.push(message.text());
+        }
+      });
 
-      const bodyText = (await page.locator("body").textContent()) ?? "";
-      matchedTexts = problem.config.requiredTexts.filter((text) => bodyText.includes(text));
-      missingTexts = problem.config.requiredTexts.filter((text) => !bodyText.includes(text));
+      page.on("pageerror", (error) => {
+        pageErrors.push(error.message);
+      });
+
+      try {
+        await page.goto(pathToFileURL(entryPath).toString(), {
+          waitUntil: "load",
+          timeout: 5000,
+        });
+        await page.waitForTimeout(250);
+        await page.screenshot({
+          path: screenshotPath,
+          fullPage: true,
+        });
+        screenshotUrl = this.runtimeStorageService.getArtifactUrl(submissionId, screenshotFilename);
+
+        const selectorChecks = await Promise.all(
+          problem.config.requiredSelectors.map(async (selector) => ({
+            selector,
+            found: (await page.locator(selector).count()) > 0,
+          })),
+        );
+
+        missingSelectors = selectorChecks.filter((item) => !item.found).map((item) => item.selector);
+
+        const bodyText = (await page.locator("body").textContent()) ?? "";
+        matchedTexts = problem.config.requiredTexts.filter((text) => bodyText.includes(text));
+        missingTexts = problem.config.requiredTexts.filter((text) => !bodyText.includes(text));
+      } catch (error) {
+        loadError = error instanceof Error ? error.message : "Unknown Playwright load error";
+      } finally {
+        await page.close();
+      }
+    } finally {
+      await browser.close();
     }
-
-    await page.close();
-    await browser.close();
 
     const allConsoleErrors = [...consoleErrors, ...pageErrors];
     const evidence = this.buildEvidence(missingSelectors, missingTexts, allConsoleErrors, loadError);
 
     return {
       renderOk: !loadError && missingSelectors.length === 0 && missingTexts.length === 0,
-      screenshotPath,
+      screenshotPath: screenshotUrl ? screenshotPath : undefined,
       screenshotUrl,
       consoleErrors: allConsoleErrors,
       missingSelectors,
@@ -122,11 +115,6 @@ export class RenderAnalysisService {
       loadError,
       evidence,
     };
-  }
-
-  private toAbsoluteArtifactUrl(pathname: string) {
-    const baseUrl = this.configService.get<string>("APP_BASE_URL") ?? "http://127.0.0.1:3001";
-    return new URL(pathname, baseUrl).toString();
   }
 
   private buildEvidence(
