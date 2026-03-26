@@ -2,7 +2,13 @@ import { Injectable } from "@nestjs/common";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { chromium } from "playwright";
-import { EvidenceItem, Problem, RenderCheckResult, SubmissionFile } from "@yema/shared";
+import {
+  EvidenceItem,
+  Problem,
+  ProblemEvaluationRule,
+  RenderCheckResult,
+  SubmissionFile,
+} from "@yema/shared";
 import { RuntimeStorageService } from "../../storage/runtime-storage.service.js";
 
 @Injectable()
@@ -24,7 +30,7 @@ export class RenderAnalysisService {
     if (!htmlFile) {
       return {
         renderOk: false,
-        consoleErrors: ["未提交 HTML 入口文件，无法进行浏览器渲染。"],
+        consoleErrors: ["未提交 HTML 入口文件，无法执行浏览器渲染检查。"],
         missingSelectors: [...problem.config.requiredSelectors],
         matchedTexts: [],
         missingTexts: [...problem.config.requiredTexts],
@@ -33,6 +39,7 @@ export class RenderAnalysisService {
           {
             id: "render-entry-missing",
             category: "render",
+            dimension: "engineering",
             title: "浏览器渲染已跳过",
             detail: "提交内容中没有 HTML 入口文件，因此 Playwright 无法加载页面。",
             severity: "error",
@@ -53,8 +60,8 @@ export class RenderAnalysisService {
     try {
       const page = await browser.newPage({
         viewport: {
-          width: 1440,
-          height: 960,
+          width: problem.config.renderConfig.viewportWidth,
+          height: problem.config.renderConfig.viewportHeight,
         },
       });
 
@@ -73,7 +80,7 @@ export class RenderAnalysisService {
           waitUntil: "load",
           timeout: 5000,
         });
-        await page.waitForTimeout(250);
+        await page.waitForTimeout(problem.config.renderConfig.waitAfterLoadMs);
         await page.screenshot({
           path: screenshotPath,
           fullPage: true,
@@ -102,7 +109,7 @@ export class RenderAnalysisService {
     }
 
     const allConsoleErrors = [...consoleErrors, ...pageErrors];
-    const evidence = this.buildEvidence(missingSelectors, missingTexts, allConsoleErrors, loadError);
+    const evidence = this.buildEvidence(problem, missingSelectors, missingTexts, allConsoleErrors, loadError);
 
     return {
       renderOk: !loadError && missingSelectors.length === 0 && missingTexts.length === 0,
@@ -118,6 +125,7 @@ export class RenderAnalysisService {
   }
 
   private buildEvidence(
+    problem: Problem,
     missingSelectors: string[],
     missingTexts: string[],
     consoleErrors: string[],
@@ -129,6 +137,7 @@ export class RenderAnalysisService {
       evidence.push({
         id: "render-load-failed",
         category: "render",
+        dimension: "uiRendering",
         title: "页面加载失败",
         detail: `Playwright 无法加载生成后的页面：${loadError}`,
         severity: "error",
@@ -137,51 +146,71 @@ export class RenderAnalysisService {
       return evidence;
     }
 
-    evidence.push({
-      id: "render-dom-check",
-      category: "render",
-      title: missingSelectors.length === 0 ? "必需选择器已渲染" : "渲染后缺少必需选择器",
-      detail:
-        missingSelectors.length === 0
-          ? "在浏览器渲染后的 DOM 中找到了所有必需选择器。"
-          : `渲染后缺少以下必需选择器：${missingSelectors.join(", ")}`,
-      severity: missingSelectors.length === 0 ? "info" : "warning",
-      scoreImpact: missingSelectors.length === 0 ? 10 : -10,
-    });
-
-    evidence.push({
-      id: "render-text-check",
-      category: "render",
-      title: missingTexts.length === 0 ? "必需文本已渲染" : "渲染后缺少必需文本",
-      detail:
-        missingTexts.length === 0
-          ? "所有必需文本都已经出现在渲染后的页面中。"
-          : `渲染后缺少以下必需文本：${missingTexts.join(", ")}`,
-      severity: missingTexts.length === 0 ? "info" : "warning",
-      scoreImpact: missingTexts.length === 0 ? 6 : -8,
-    });
-
-    if (consoleErrors.length > 0) {
-      evidence.push({
-        id: "render-console-errors",
-        category: "render",
-        title: "浏览器控制台存在错误",
-        detail: `渲染期间捕获到以下控制台错误：${consoleErrors.join(" | ")}`,
-        severity: "warning",
-        scoreImpact: -6,
+    for (const rule of problem.config.evaluationRules.filter((item) => item.engine === "render")) {
+      const result = this.evaluateRenderRule(rule, {
+        missingSelectors,
+        missingTexts,
+        consoleErrors,
       });
-    } else {
+
+      if (!result) {
+        continue;
+      }
+
       evidence.push({
-        id: "render-console-clean",
+        id: rule.id,
         category: "render",
-        title: "浏览器控制台无异常",
-        detail: "浏览器渲染期间未捕获到控制台错误或页面错误。",
-        severity: "info",
-        scoreImpact: 2,
+        dimension: rule.dimension,
+        title: rule.title,
+        detail: result.detail,
+        severity: result.severity,
+        scoreImpact: result.scoreImpact,
       });
     }
 
+    evidence.push({
+      id: "render-screenshot-generated",
+      category: "render",
+      dimension: "uiRendering",
+      title: "已生成渲染截图",
+      detail: "本次浏览器检查已生成页面截图，可用于答辩展示和人工复核。",
+      severity: "info",
+      scoreImpact: 0,
+    });
+
     return evidence;
   }
-}
 
+  private evaluateRenderRule(
+    rule: ProblemEvaluationRule,
+    input: {
+      missingSelectors: string[];
+      missingTexts: string[];
+      consoleErrors: string[];
+    },
+  ) {
+    if (rule.type === "selector" && rule.target) {
+      return this.buildRuleEvidence(rule, !input.missingSelectors.includes(rule.target));
+    }
+
+    if (rule.type === "text" && rule.target) {
+      return this.buildRuleEvidence(rule, !input.missingTexts.includes(rule.target));
+    }
+
+    if (rule.type === "console") {
+      return this.buildRuleEvidence(rule, input.consoleErrors.length === 0);
+    }
+
+    return undefined;
+  }
+
+  private buildRuleEvidence(rule: ProblemEvaluationRule, passed: boolean) {
+    return {
+      detail: passed
+        ? rule.successMessage ?? `${rule.description}：检查通过。`
+        : rule.failureMessage ?? `${rule.description}：检查未通过。`,
+      severity: passed ? ("info" as const) : rule.failureSeverity,
+      scoreImpact: passed ? 0 : rule.failureScoreImpact,
+    };
+  }
+}
