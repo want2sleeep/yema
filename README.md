@@ -4,7 +4,20 @@ MVP skeleton for an LLM-powered frontend online judge. The project targets front
 
 ## Quick start
 
-This repository uses `pnpm` workspaces.
+This repository uses `pnpm` workspaces. The `packageManager` field in `package.json` pins the exact pnpm version, so the easiest way to get started is via [Corepack](https://nodejs.org/api/corepack.html), which ships with Node.js 16.9+:
+
+```bash
+corepack enable        # one-time setup – makes pnpm available
+corepack prepare --activate  # activates the pinned version from package.json
+```
+
+Alternatively, install pnpm directly:
+
+```bash
+npm install -g pnpm
+```
+
+Then install dependencies and start the dev server:
 
 ```bash
 pnpm install
