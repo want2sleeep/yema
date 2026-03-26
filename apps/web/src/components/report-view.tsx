@@ -23,8 +23,22 @@ const textTranslationMap: Record<string, string> = {
   "Evaluates file completeness and submission hygiene.": "根据文件完整性、运行稳定性和提交规范评估工程规范。",
 };
 
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3001/api";
+
 function t(value: string) {
   return textTranslationMap[value] ?? value;
+}
+
+function resolveArtifactUrl(value?: string) {
+  if (!value) {
+    return value;
+  }
+
+  if (/^https?:\/\//i.test(value)) {
+    return value;
+  }
+
+  return new URL(value, API_BASE.replace(/\/api\/?$/, "/")).toString();
 }
 
 export function ReportView({ submission, report }: { submission: Submission; report: EvaluationReport }) {
@@ -87,7 +101,7 @@ export function ReportView({ submission, report }: { submission: Submission; rep
         <h3>渲染截图</h3>
         {report.artifacts?.screenshotUrl ? (
           <div className="render-artifact">
-            <img src={report.artifacts.screenshotUrl} alt="提交页面渲染截图" className="render-image" />
+            <img src={resolveArtifactUrl(report.artifacts.screenshotUrl)} alt="提交页面渲染截图" className="render-image" />
           </div>
         ) : (
           <p className="muted">当前提交暂时还没有可用的截图产物。</p>
@@ -142,4 +156,3 @@ export function ReportView({ submission, report }: { submission: Submission; rep
     </section>
   );
 }
-

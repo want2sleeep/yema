@@ -81,7 +81,6 @@ export class ScoreAggregatorService {
       suggestions: llmFeedback.nextSteps,
       llmFeedback,
       artifacts: {
-        screenshotPath: renderResult.screenshotPath,
         screenshotUrl: renderResult.screenshotUrl,
       },
       renderDetails: {

@@ -49,10 +49,12 @@ export class StaticAnalysisService {
     let matchedTexts: string[] = [];
     let missingTexts = [...problem.config.requiredTexts];
     let syntaxOk = Boolean(htmlFile && cssFile);
+    let htmlParsed = false;
 
     if (htmlFile) {
       try {
         const document = parse(htmlContent);
+        htmlParsed = true;
         matchedSelectors = problem.config.requiredSelectors.filter((selector) => this.containsSelector(document, selector));
         missingSelectors = problem.config.requiredSelectors.filter((selector) => !matchedSelectors.includes(selector));
         matchedTexts = problem.config.requiredTexts.filter((text) => this.containsText(document, text));
@@ -70,6 +72,13 @@ export class StaticAnalysisService {
       }
     }
 
+    if (!htmlParsed) {
+      matchedSelectors = [];
+      missingSelectors = [];
+      matchedTexts = [];
+      missingTexts = [];
+    }
+
     if (missingFiles.length > 0) {
       evidence.push({
         id: "static-missing-files",
@@ -81,47 +90,58 @@ export class StaticAnalysisService {
       });
     }
 
-    if (missingTexts.length > 0) {
-      evidence.push({
-        id: "static-missing-text",
-        category: "static",
-        title: "缺少必需文本",
-        detail: `在 HTML 结构树中未找到以下必需文本：${missingTexts.join(", ")}`,
-        severity: "warning",
-        scoreImpact: -8,
-      });
+    if (htmlParsed) {
+      if (missingTexts.length > 0) {
+        evidence.push({
+          id: "static-missing-text",
+          category: "static",
+          title: "缺少必需文本",
+          detail: `在解析后的 HTML 结构中未找到以下必需文本：${missingTexts.join(", ")}`,
+          severity: "warning",
+          scoreImpact: -8,
+        });
+      } else {
+        evidence.push({
+          id: "static-text-ok",
+          category: "static",
+          title: "必需文本已命中",
+          detail: "所有必需文本都已经出现在解析后的 HTML 结构中。",
+          severity: "info",
+          scoreImpact: 4,
+        });
+      }
+
+      if (missingSelectors.length > 0) {
+        evidence.push({
+          id: "static-missing-selectors",
+          category: "static",
+          title: "源码中缺少必需选择器",
+          detail: `在 HTML AST 中未找到以下选择器：${missingSelectors.join(", ")}`,
+          severity: "warning",
+          scoreImpact: -8,
+        });
+      } else {
+        evidence.push({
+          id: "static-selectors-ok",
+          category: "static",
+          title: "源码中已包含必需选择器",
+          detail: "在浏览器渲染之前，HTML AST 中已经包含全部必需选择器。",
+          severity: "info",
+          scoreImpact: 4,
+        });
+      }
     } else {
       evidence.push({
-        id: "static-text-ok",
+        id: "static-html-checks-skipped",
         category: "static",
-        title: "必需文本已命中",
-        detail: "所有必需文本都已出现在解析后的 HTML 结构中。",
-        severity: "info",
-        scoreImpact: 4,
+        title: "HTML 结构检查已跳过",
+        detail: htmlFile ? "HTML 解析失败，因此跳过了选择器和文本的 AST 检查。" : "未提交 HTML 文件，因此跳过了选择器和文本的 AST 检查。",
+        severity: "warning",
+        scoreImpact: -4,
       });
     }
 
-    if (missingSelectors.length > 0) {
-      evidence.push({
-        id: "static-missing-selectors",
-        category: "static",
-        title: "源码中缺少必需选择器",
-        detail: `在 HTML AST 中未找到以下选择器：${missingSelectors.join(", ")}`,
-        severity: "warning",
-        scoreImpact: -8,
-      });
-    } else {
-      evidence.push({
-        id: "static-selectors-ok",
-        category: "static",
-        title: "源码中已包含必需选择器",
-        detail: "在浏览器渲染之前，HTML AST 中已包含全部必需选择器。",
-        severity: "info",
-        scoreImpact: 4,
-      });
-    }
-
-    if (!cssContent.includes("display")) {
+    if (cssFile && !cssContent.includes("display")) {
       evidence.push({
         id: "static-style-weak",
         category: "static",
@@ -259,3 +279,4 @@ export class StaticAnalysisService {
     return node.attrs.find((attribute) => attribute.name === name)?.value;
   }
 }
+
