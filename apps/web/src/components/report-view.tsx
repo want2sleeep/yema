@@ -1,6 +1,20 @@
 import Link from "next/link";
 import { EvaluationReport, Submission } from "@yema/shared";
 
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3001/api";
+
+function resolveArtifactUrl(value?: string) {
+  if (!value) {
+    return value;
+  }
+
+  if (/^https?:\/\//i.test(value)) {
+    return value;
+  }
+
+  return new URL(value, API_BASE.replace(/\/api\/?$/, "/")).toString();
+}
+
 export function ReportView({ submission, report }: { submission: Submission; report: EvaluationReport }) {
   return (
     <section className="grid">
@@ -61,7 +75,7 @@ export function ReportView({ submission, report }: { submission: Submission; rep
         <h3>Render Snapshot</h3>
         {report.artifacts?.screenshotUrl ? (
           <div className="render-artifact">
-            <img src={report.artifacts.screenshotUrl} alt="Rendered submission screenshot" className="render-image" />
+            <img src={resolveArtifactUrl(report.artifacts.screenshotUrl)} alt="Rendered submission screenshot" className="render-image" />
           </div>
         ) : (
           <p className="muted">No screenshot artifact is available for this submission yet.</p>

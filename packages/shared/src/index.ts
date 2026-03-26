@@ -89,7 +89,6 @@ export type RenderCheckResult = {
 };
 
 export type EvaluationArtifacts = {
-  screenshotPath?: string;
   screenshotUrl?: string;
 };
 
