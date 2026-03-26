@@ -9,7 +9,7 @@
     "lint": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@yema/shared": "*",
+    "@yema/shared": "workspace:*",
     "@monaco-editor/react": "^4.6.0",
     "next": "^15.0.3",
     "react": "^19.0.0",
