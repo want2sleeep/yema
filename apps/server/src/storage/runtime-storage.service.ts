@@ -5,10 +5,16 @@ import { SubmissionFile } from "@yema/shared";
 
 @Injectable()
 export class RuntimeStorageService {
-  private readonly root = join(process.cwd(), "runtime");
+  private readonly root = resolve(join(process.cwd(), "runtime"));
 
   async ensureDir(pathSegment: string) {
-    const fullPath = join(this.root, pathSegment);
+    const normalizedSegment = this.normalizeRelativeDirPath(pathSegment);
+    const fullPath = resolve(this.root, normalizedSegment);
+
+    if (!this.isWithinBaseDir(fullPath, this.root)) {
+      throw new Error("Invalid runtime directory path");
+    }
+
     await mkdir(fullPath, { recursive: true });
     return fullPath;
   }
@@ -22,7 +28,7 @@ export class RuntimeStorageService {
 
   async writeSubmissionFiles(submissionId: string, files: SubmissionFile[]) {
     const safeSubmissionId = this.normalizeSubmissionId(submissionId);
-    const workspaceDir = await this.ensureDir(join("submissions", safeSubmissionId, "workspace"));
+    const workspaceDir = await this.ensureSubmissionWorkspaceDir(safeSubmissionId);
     const resolvedWorkspaceDir = resolve(workspaceDir);
 
     await Promise.all(
@@ -42,6 +48,14 @@ export class RuntimeStorageService {
     return workspaceDir;
   }
 
+  async ensureSubmissionWorkspaceDir(submissionId: string) {
+    return this.ensureDir(join("submissions", this.normalizeSubmissionId(submissionId), "workspace"));
+  }
+
+  async ensureReportDir(submissionId: string) {
+    return this.ensureDir(join("reports", this.normalizeSubmissionId(submissionId)));
+  }
+
   getSubmissionWorkspaceDir(submissionId: string) {
     return join(this.root, "submissions", this.normalizeSubmissionId(submissionId), "workspace");
   }
@@ -55,7 +69,10 @@ export class RuntimeStorageService {
   }
 
   getArtifactUrl(submissionId: string, filename: string) {
-    return `/api/artifacts/${submissionId}/${filename}`;
+    const safeSubmissionId = this.normalizeSubmissionId(submissionId);
+    const safeFilename = this.normalizeRelativeFilePath(filename);
+    const segments = safeFilename.split("/").map((segment) => encodeURIComponent(segment));
+    return `/api/artifacts/${encodeURIComponent(safeSubmissionId)}/${segments.join("/")}`;
   }
 
   resolveArtifactPath(submissionId: string, filename: string) {
@@ -88,6 +105,20 @@ export class RuntimeStorageService {
 
     if (normalizedPath.split("/").some((segment) => segment === ".." || segment === "")) {
       throw new Error("Invalid relative path");
+    }
+
+    return normalizedPath;
+  }
+
+  private normalizeRelativeDirPath(pathSegment: string) {
+    const normalizedPath = normalize(pathSegment).replace(/\\/g, "/");
+
+    if (!normalizedPath || normalizedPath === "." || isAbsolute(normalizedPath)) {
+      throw new Error("Invalid relative directory path");
+    }
+
+    if (normalizedPath.split("/").some((segment) => segment === ".." || segment === "")) {
+      throw new Error("Invalid relative directory path");
     }
 
     return normalizedPath;

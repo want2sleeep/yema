@@ -10,7 +10,7 @@ export class RenderAnalysisService {
   constructor(private readonly runtimeStorageService: RuntimeStorageService) {}
 
   async analyze(problem: Problem, submissionId: string, files: SubmissionFile[]): Promise<RenderCheckResult> {
-    const reportDir = await this.runtimeStorageService.ensureDir(`reports/${submissionId}`);
+    const reportDir = await this.runtimeStorageService.ensureReportDir(submissionId);
     const screenshotFilename = "render.png";
     const screenshotPath = join(reportDir, screenshotFilename);
     const consoleErrors: string[] = [];
