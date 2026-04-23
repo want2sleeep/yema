@@ -14,7 +14,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <div className="app-shell">
           <header className="page-header">
             <div>
-              <div className="pill">本科毕设 MVP</div>
               <h1>页码：前端智能判题系统</h1>
               <p className="muted">面向前端作业场景，支持结构化评分、页面渲染分析与智能教学反馈。</p>
             </div>
