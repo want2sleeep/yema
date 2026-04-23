@@ -58,7 +58,7 @@ export class OllamaProvider implements LlmProvider {
 
   private normalizeResponse(payload: Partial<LlmFeedback>): LlmFeedback {
     return {
-      summary: payload.summary ?? "Local Ollama provider returned no summary.",
+      summary: payload.summary ?? "本地 Ollama 提供器未返回总结。",
       strengths: payload.strengths ?? [],
       weaknesses: payload.weaknesses ?? [],
       nextSteps: payload.nextSteps ?? [],
@@ -68,14 +68,23 @@ export class OllamaProvider implements LlmProvider {
 
   private buildPrompt(input: LlmAnalysisInput) {
     const codeSummary = input.files.map((file) => `${file.path}\n${file.content}`).join("\n\n");
+    const requirements = input.problem.config.requirements.map((item, index) => `${index + 1}. ${item}`).join("\n");
+    const ruleSummary = input.problem.config.evaluationRules
+      .map(
+        (rule) =>
+          `- [${rule.engine}/${rule.dimension}] ${rule.title}: ${rule.description}${rule.target ? ` (target=${rule.target})` : ""}`,
+      )
+      .join("\n");
 
     return [
       "你正在为一个前端在线判题系统生成结构化教学反馈。",
-      "请返回严格 JSON，包含键：summary、strengths、weaknesses、nextSteps、riskFlags。",
-      "所有字段内容请使用简体中文，不要输出 Markdown 代码块或额外解释。",
+      "请严格返回 JSON，包含键：summary、strengths、weaknesses、nextSteps、riskFlags。",
+      "所有字段内容都使用简体中文，不要输出 Markdown 代码块或额外解释。",
       "",
       `题目名称：${input.problem.title}`,
       `题目描述：${input.problem.description}`,
+      `完成要求：\n${requirements}`,
+      `判题规则：\n${ruleSummary}`,
       `必需选择器：${input.problem.config.requiredSelectors.join(", ")}`,
       `必需文本：${input.problem.config.requiredTexts.join(", ")}`,
       "",

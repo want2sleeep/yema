@@ -13,10 +13,40 @@ export type ProblemWeightConfig = {
   engineering: number;
 };
 
+export type ProblemScoreDimension = keyof ProblemWeightConfig;
+
+export type ProblemRuleEngine = "static" | "render";
+
+export type ProblemRuleType = "file" | "selector" | "text" | "keyword" | "console";
+
+export type ProblemEvaluationRule = {
+  id: string;
+  title: string;
+  description: string;
+  engine: ProblemRuleEngine;
+  type: ProblemRuleType;
+  dimension: ProblemScoreDimension;
+  target?: string;
+  keywords?: string[];
+  failureSeverity: "warning" | "error";
+  failureScoreImpact: number;
+  successMessage?: string;
+  failureMessage?: string;
+};
+
+export type ProblemRenderConfig = {
+  viewportWidth: number;
+  viewportHeight: number;
+  waitAfterLoadMs: number;
+};
+
 export type ProblemConfig = {
   editableFiles: EditableFile[];
+  requirements: string[];
   requiredSelectors: string[];
   requiredTexts: string[];
+  evaluationRules: ProblemEvaluationRule[];
+  renderConfig: ProblemRenderConfig;
   weights: ProblemWeightConfig;
 };
 
@@ -63,6 +93,7 @@ export type SubmissionSummary = {
 export type EvidenceItem = {
   id: string;
   category: "static" | "render" | "llm" | "system";
+  dimension?: ProblemScoreDimension;
   title: string;
   detail: string;
   severity: "info" | "warning" | "error";

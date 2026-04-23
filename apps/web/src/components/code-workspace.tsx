@@ -8,6 +8,13 @@ import { createSubmission } from "../lib/api";
 
 const MonacoEditor = dynamic(() => import("@monaco-editor/react"), { ssr: false });
 
+const dimensionLabelMap = {
+  correctness: "功能正确性",
+  codeQuality: "代码质量",
+  uiRendering: "页面渲染",
+  engineering: "工程规范",
+} as const;
+
 export function CodeWorkspace({ problem }: { problem: Problem }) {
   const router = useRouter();
   const initialFiles = useMemo<SubmissionFile[]>(
@@ -47,6 +54,14 @@ export function CodeWorkspace({ problem }: { problem: Problem }) {
         <div className="pill">题目</div>
         <h2>{problem.title}</h2>
         <p className="muted">{problem.description}</p>
+
+        <h3>完成要求</h3>
+        <ul>
+          {problem.config.requirements.map((item, index) => (
+            <li key={`${index}-${item}`}>{item}</li>
+          ))}
+        </ul>
+
         <h3>评分权重</h3>
         <ul>
           <li>功能正确性：{problem.config.weights.correctness}</li>
@@ -54,12 +69,20 @@ export function CodeWorkspace({ problem }: { problem: Problem }) {
           <li>页面渲染：{problem.config.weights.uiRendering}</li>
           <li>工程规范：{problem.config.weights.engineering}</li>
         </ul>
-        <h3>必需选择器</h3>
+
+        <h3>关键判题规则</h3>
         <ul>
-          {problem.config.requiredSelectors.map((selector) => (
-            <li key={selector}>{selector}</li>
+          {problem.config.evaluationRules.slice(0, 5).map((rule) => (
+            <li key={rule.id}>
+              {rule.title}（{dimensionLabelMap[rule.dimension]}）
+            </li>
           ))}
         </ul>
+
+        <p className="muted">
+          渲染视口：{problem.config.renderConfig.viewportWidth} × {problem.config.renderConfig.viewportHeight}
+        </p>
+
         <button type="button" className="button" onClick={handleSubmit} disabled={isPending}>
           {isPending ? "提交中..." : "提交评测"}
         </button>

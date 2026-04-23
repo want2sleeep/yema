@@ -2,7 +2,13 @@ import { Injectable } from "@nestjs/common";
 import { ESLint, Linter } from "eslint";
 import js from "@eslint/js";
 import { parse, type DefaultTreeAdapterMap } from "parse5";
-import { EvidenceItem, Problem, StaticAnalysisResult, SubmissionFile } from "@yema/shared";
+import {
+  EvidenceItem,
+  Problem,
+  ProblemEvaluationRule,
+  StaticAnalysisResult,
+  SubmissionFile,
+} from "@yema/shared";
 
 type HtmlNode = DefaultTreeAdapterMap["node"];
 type HtmlParentNode = DefaultTreeAdapterMap["parentNode"];
@@ -50,10 +56,12 @@ export class StaticAnalysisService {
     let missingTexts = [...problem.config.requiredTexts];
     let syntaxOk = Boolean(htmlFile && cssFile);
     let htmlParsed = false;
+    let htmlDocument: HtmlNode | undefined;
 
     if (htmlFile) {
       try {
         const document = parse(htmlContent);
+        htmlDocument = document;
         htmlParsed = true;
         matchedSelectors = problem.config.requiredSelectors.filter((selector) => this.containsSelector(document, selector));
         missingSelectors = problem.config.requiredSelectors.filter((selector) => !matchedSelectors.includes(selector));
@@ -64,8 +72,9 @@ export class StaticAnalysisService {
         evidence.push({
           id: "static-html-parse-error",
           category: "static",
+          dimension: "engineering",
           title: "HTML 解析失败",
-          detail: "提交的 HTML 无法被解析为结构化文档树。",
+          detail: "提交的 HTML 无法被解析为结构化文档树，后续静态结构检查已跳过。",
           severity: "error",
           scoreImpact: -12,
         });
@@ -79,76 +88,39 @@ export class StaticAnalysisService {
       missingTexts = [];
     }
 
-    if (missingFiles.length > 0) {
+    for (const rule of problem.config.evaluationRules.filter((item) => item.engine === "static")) {
+      const result = this.evaluateStaticRule(rule, {
+        files,
+        cssContent,
+        htmlDocument,
+      });
+
+      if (!result) {
+        continue;
+      }
+
       evidence.push({
-        id: "static-missing-files",
+        id: rule.id,
         category: "static",
-        title: "缺少必需文件",
-        detail: `缺少以下必需可编辑文件：${missingFiles.join(", ")}`,
-        severity: "error",
-        scoreImpact: -12,
+        dimension: rule.dimension,
+        title: rule.title,
+        detail: result.detail,
+        severity: result.severity,
+        scoreImpact: result.scoreImpact,
       });
     }
 
-    if (htmlParsed) {
-      if (missingTexts.length > 0) {
-        evidence.push({
-          id: "static-missing-text",
-          category: "static",
-          title: "缺少必需文本",
-          detail: `在解析后的 HTML 结构中未找到以下必需文本：${missingTexts.join(", ")}`,
-          severity: "warning",
-          scoreImpact: -8,
-        });
-      } else {
-        evidence.push({
-          id: "static-text-ok",
-          category: "static",
-          title: "必需文本已命中",
-          detail: "所有必需文本都已经出现在解析后的 HTML 结构中。",
-          severity: "info",
-          scoreImpact: 4,
-        });
-      }
-
-      if (missingSelectors.length > 0) {
-        evidence.push({
-          id: "static-missing-selectors",
-          category: "static",
-          title: "源码中缺少必需选择器",
-          detail: `在 HTML AST 中未找到以下选择器：${missingSelectors.join(", ")}`,
-          severity: "warning",
-          scoreImpact: -8,
-        });
-      } else {
-        evidence.push({
-          id: "static-selectors-ok",
-          category: "static",
-          title: "源码中已包含必需选择器",
-          detail: "在浏览器渲染之前，HTML AST 中已经包含全部必需选择器。",
-          severity: "info",
-          scoreImpact: 4,
-        });
-      }
-    } else {
+    if (!htmlParsed) {
       evidence.push({
         id: "static-html-checks-skipped",
         category: "static",
+        dimension: "engineering",
         title: "HTML 结构检查已跳过",
-        detail: htmlFile ? "HTML 解析失败，因此跳过了选择器和文本的 AST 检查。" : "未提交 HTML 文件，因此跳过了选择器和文本的 AST 检查。",
+        detail: htmlFile
+          ? "由于 HTML 解析失败，源码中的选择器和文本检查未执行。"
+          : "提交中缺少 HTML 文件，源码中的选择器和文本检查未执行。",
         severity: "warning",
         scoreImpact: -4,
-      });
-    }
-
-    if (cssFile && !cssContent.includes("display")) {
-      evidence.push({
-        id: "static-style-weak",
-        category: "static",
-        title: "布局样式较弱",
-        detail: "CSS 中缺少常见的布局声明，页面可能还不够完整。",
-        severity: "warning",
-        scoreImpact: -6,
       });
     }
 
@@ -175,6 +147,7 @@ export class StaticAnalysisService {
           evidence.push({
             id: `static-lint-${lintMessages.length}`,
             category: "static",
+            dimension: "codeQuality",
             title: message.severity === 2 ? "ESLint 错误" : "ESLint 警告",
             detail: normalized,
             severity: message.severity === 2 ? "error" : "warning",
@@ -189,7 +162,8 @@ export class StaticAnalysisService {
       evidence.push({
         id: "static-lint-skipped",
         category: "static",
-        title: "未提供 JavaScript lint 目标",
+        dimension: "codeQuality",
+        title: "未提供 JavaScript 检查目标",
         detail: "当前提交仅包含 HTML/CSS 文件，因此跳过了 ESLint 检查。",
         severity: "info",
         scoreImpact: 0,
@@ -207,6 +181,52 @@ export class StaticAnalysisService {
       missingFiles,
       lintMessages,
       evidence,
+    };
+  }
+
+  private evaluateStaticRule(
+    rule: ProblemEvaluationRule,
+    input: {
+      files: SubmissionFile[];
+      cssContent: string;
+      htmlDocument?: HtmlNode;
+    },
+  ) {
+    if (rule.type === "file" && rule.target) {
+      const passed = input.files.some((file) => file.path === rule.target);
+      return this.buildRuleEvidence(rule, passed);
+    }
+
+    if (rule.type === "keyword") {
+      const passed =
+        rule.keywords !== undefined &&
+        rule.keywords.length > 0 &&
+        rule.keywords.every((keyword) => input.cssContent.includes(keyword));
+      return this.buildRuleEvidence(rule, passed);
+    }
+
+    if (!input.htmlDocument) {
+      return undefined;
+    }
+
+    if (rule.type === "selector" && rule.target) {
+      return this.buildRuleEvidence(rule, this.containsSelector(input.htmlDocument, rule.target));
+    }
+
+    if (rule.type === "text" && rule.target) {
+      return this.buildRuleEvidence(rule, this.containsText(input.htmlDocument, rule.target));
+    }
+
+    return undefined;
+  }
+
+  private buildRuleEvidence(rule: ProblemEvaluationRule, passed: boolean) {
+    return {
+      detail: passed
+        ? rule.successMessage ?? `${rule.description}：检查通过。`
+        : rule.failureMessage ?? `${rule.description}：检查未通过。`,
+      severity: passed ? ("info" as const) : rule.failureSeverity,
+      scoreImpact: passed ? 0 : rule.failureScoreImpact,
     };
   }
 
@@ -279,4 +299,3 @@ export class StaticAnalysisService {
     return node.attrs.find((attribute) => attribute.name === name)?.value;
   }
 }
-
