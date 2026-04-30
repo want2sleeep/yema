@@ -23,13 +23,18 @@ type RequestOptions = {
 };
 
 async function request<T>(path: string, init?: RequestInit, options?: RequestOptions): Promise<T> {
+  const headers: Record<string, string> = {
+    ...(options?.cookieHeader ? { Cookie: options.cookieHeader } : {}),
+    ...((init?.headers as Record<string, string> | undefined) ?? {}),
+  };
+
+  if (init?.body !== undefined && !("Content-Type" in headers)) {
+    headers["Content-Type"] = "application/json";
+  }
+
   const response = await fetch(`${API_BASE}${path}`, {
     ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...(options?.cookieHeader ? { Cookie: options.cookieHeader } : {}),
-      ...(init?.headers ?? {}),
-    },
+    headers,
     cache: "no-store",
     credentials: "include",
   });
