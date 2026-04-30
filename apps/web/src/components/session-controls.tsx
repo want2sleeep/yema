@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import type { AuthUser } from "@yema/shared";
 import { logout } from "../lib/api";
-import { getAvatarGradient, getAvatarInitial } from "../lib/avatar";
+import { getAvatarUrl } from "../lib/avatar";
 import { cn } from "../lib/utils";
 
 export function SessionControls({ user }: { user: AuthUser | null }) {
@@ -32,11 +32,13 @@ export function SessionControls({ user }: { user: AuthUser | null }) {
 
   return (
     <div className="group relative inline-block">
-      <div
-        className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-[15px] font-bold text-white shadow-sm transition-all hover:scale-105 hover:shadow-md"
-        style={{ backgroundImage: getAvatarGradient(user.name, user.email) }}
-      >
-        {getAvatarInitial(user.name, user.email)}
+      <div className="flex h-9 w-9 cursor-pointer items-center justify-center overflow-hidden rounded-full border border-border bg-muted shadow-sm transition-all hover:scale-105 hover:shadow-md">
+        <img
+          src={getAvatarUrl(user.email, "bottts-neutral")}
+          alt={user.name}
+          className="h-full w-full object-cover"
+          loading="lazy"
+        />
       </div>
       
       <div className="invisible absolute right-0 top-full z-50 mt-3 w-60 translate-y-2 rounded-xl border border-border bg-card p-4 text-left shadow-lg opacity-0 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
