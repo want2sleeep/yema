@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useTransition } from "react";
 import type { AuthUser } from "@yema/shared";
 import { logout } from "../lib/api";
+import { getAvatarGradient, getAvatarInitial } from "../lib/avatar";
 
 export function SessionControls({ user }: { user: AuthUser | null }) {
   const router = useRouter();
@@ -28,13 +29,19 @@ export function SessionControls({ user }: { user: AuthUser | null }) {
 
   return (
     <>
-      <div className="session-chip">
-        <strong>{user.name}</strong>
-        <span>{user.email}</span>
-      </div>
       <Link href="/submissions" className="button secondary">
         我的提交
       </Link>
+      <div className="session-chip user-chip" data-email={user.email} title={user.email}>
+        <div
+          className="user-avatar"
+          aria-hidden="true"
+          style={{ backgroundImage: getAvatarGradient(user.name, user.email) }}
+        >
+          {getAvatarInitial(user.name, user.email)}
+        </div>
+        <strong className="user-name">{user.name}</strong>
+      </div>
       <button type="button" className="button secondary" onClick={handleLogout} disabled={isPending}>
         {isPending ? "退出中..." : "退出登录"}
       </button>
