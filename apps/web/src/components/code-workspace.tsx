@@ -3,19 +3,31 @@
 import { useMemo, useState, useTransition } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import { Problem, SubmissionFile } from "@yema/shared";
-import { createSubmission } from "../lib/api";
+import { AuthUser, Problem, SubmissionFile } from "@yema/shared";
+import { ApiError, createSubmission } from "../lib/api";
 
 const MonacoEditor = dynamic(() => import("@monaco-editor/react"), { ssr: false });
 
 const dimensionLabelMap = {
-  correctness: "功能正确性",
+  correctness: "功能完成度",
   codeQuality: "代码质量",
   uiRendering: "页面渲染",
   engineering: "工程规范",
 } as const;
 
-export function CodeWorkspace({ problem }: { problem: Problem }) {
+function formatSubmitError(error: unknown) {
+  if (error instanceof ApiError && error.status === 401) {
+    return "请先登录后再提交。";
+  }
+
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+
+  return "提交失败，请稍后重试。";
+}
+
+export function CodeWorkspace({ problem, currentUser }: { problem: Problem; currentUser: AuthUser | null }) {
   const router = useRouter();
   const initialFiles = useMemo<SubmissionFile[]>(
     () => problem.templateFiles.map((file) => ({ path: file.path, content: file.content })),
@@ -23,6 +35,7 @@ export function CodeWorkspace({ problem }: { problem: Problem }) {
   );
   const [files, setFiles] = useState<SubmissionFile[]>(initialFiles);
   const [activePath, setActivePath] = useState<string>(initialFiles[0]?.path ?? "");
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const activeFile = files.find((file) => file.path === activePath) ?? files[0];
 
@@ -37,14 +50,23 @@ export function CodeWorkspace({ problem }: { problem: Problem }) {
   }
 
   function handleSubmit() {
-    startTransition(async () => {
-      const result = await createSubmission({
-        problemId: problem.id,
-        userId: "demo-student",
-        files,
-      });
+    if (!currentUser) {
+      window.location.href = `/auth?mode=login&returnTo=/problems/${problem.id}`;
+      return;
+    }
 
-      router.push(`/submissions/${result.submissionId}/report`);
+    startTransition(async () => {
+      try {
+        setSubmitError(null);
+        const result = await createSubmission({
+          problemId: problem.id,
+          files,
+        });
+
+        router.push(`/submissions/${result.submissionId}/report`);
+      } catch (error) {
+        setSubmitError(formatSubmitError(error));
+      }
     });
   }
 
@@ -64,24 +86,35 @@ export function CodeWorkspace({ problem }: { problem: Problem }) {
 
         <h3>评分权重</h3>
         <ul>
-          <li>功能正确性：{problem.config.weights.correctness}</li>
+          <li>功能完成度：{problem.config.weights.correctness}</li>
           <li>代码质量：{problem.config.weights.codeQuality}</li>
           <li>页面渲染：{problem.config.weights.uiRendering}</li>
           <li>工程规范：{problem.config.weights.engineering}</li>
         </ul>
 
-        <h3>关键判题规则</h3>
+        <h3>关键规则</h3>
         <ul>
           {problem.config.evaluationRules.slice(0, 5).map((rule) => (
             <li key={rule.id}>
-              {rule.title}（{dimensionLabelMap[rule.dimension]}）
+              {rule.title} ({dimensionLabelMap[rule.dimension]})
             </li>
           ))}
         </ul>
 
         <p className="muted">
-          渲染视口：{problem.config.renderConfig.viewportWidth} × {problem.config.renderConfig.viewportHeight}
+          评测视口：{problem.config.renderConfig.viewportWidth} x {problem.config.renderConfig.viewportHeight}
         </p>
+
+        {currentUser ? (
+          <p className="muted">当前登录：{currentUser.name}</p>
+        ) : (
+          <div className="notice-banner">
+            <strong>需要先登录</strong>
+            <p className="muted">登录后才可以提交本题，并保存你的评测记录。</p>
+          </div>
+        )}
+
+        {submitError ? <p className="form-error">{submitError}</p> : null}
 
         <button type="button" className="button" onClick={handleSubmit} disabled={isPending}>
           {isPending ? "提交中..." : "提交评测"}

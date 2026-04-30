@@ -8,6 +8,7 @@ import { ProblemsModule } from "./problems/problems.module.js";
 import { SubmissionsModule } from "./submissions/submissions.module.js";
 import { EvaluationModule } from "./evaluation/evaluation.module.js";
 import { RuntimeStorageService } from "./storage/runtime-storage.service.js";
+import { AuthModule } from "./auth/auth.module.js";
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { RuntimeStorageService } from "./storage/runtime-storage.service.js";
     EvaluationModule,
     QueueModule,
     SubmissionsModule,
+    AuthModule,
   ],
   controllers: [HealthController, ArtifactsController],
   providers: [RuntimeStorageService],

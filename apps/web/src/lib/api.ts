@@ -1,8 +1,11 @@
 import {
+  AuthResponse,
   CreateSubmissionRequest,
   EvaluationReport,
+  LoginRequest,
   Problem,
   ProblemSummary,
+  RegisterRequest,
   Submission,
   SubmissionSummary,
 } from "@yema/shared";
@@ -15,14 +18,20 @@ export class ApiError extends Error {
   }
 }
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
+type RequestOptions = {
+  cookieHeader?: string;
+};
+
+async function request<T>(path: string, init?: RequestInit, options?: RequestOptions): Promise<T> {
   const response = await fetch(`${API_BASE}${path}`, {
     ...init,
     headers: {
       "Content-Type": "application/json",
+      ...(options?.cookieHeader ? { Cookie: options.cookieHeader } : {}),
       ...(init?.headers ?? {}),
     },
     cache: "no-store",
+    credentials: "include",
   });
 
   if (!response.ok) {
@@ -47,8 +56,8 @@ export function createSubmission(payload: CreateSubmissionRequest) {
   });
 }
 
-export function getSubmissions() {
-  return request<SubmissionSummary[]>("/submissions");
+export function getSubmissions(cookieHeader?: string) {
+  return request<SubmissionSummary[]>("/submissions", undefined, { cookieHeader });
 }
 
 export function getSubmission(id: string) {
@@ -69,4 +78,28 @@ export async function tryGetReport(id: string) {
 
     throw error;
   }
+}
+
+export function register(payload: RegisterRequest) {
+  return request<AuthResponse>("/auth/register", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function login(payload: LoginRequest) {
+  return request<AuthResponse>("/auth/login", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function logout() {
+  return request<{ ok: boolean }>("/auth/logout", {
+    method: "POST",
+  });
+}
+
+export function getCurrentUser(cookieHeader?: string) {
+  return request<AuthResponse>("/auth/me", undefined, { cookieHeader });
 }

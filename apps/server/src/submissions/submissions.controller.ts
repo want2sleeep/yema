@@ -1,19 +1,26 @@
-import { Body, Controller, Get, Param, Post } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Req } from "@nestjs/common";
 import type { CreateSubmissionRequest } from "@yema/shared";
+import type { FastifyRequest } from "fastify";
+import { AuthService } from "../auth/auth.service.js";
 import { SubmissionsService } from "./submissions.service.js";
 
 @Controller("api/submissions")
 export class SubmissionsController {
-  constructor(private readonly submissionsService: SubmissionsService) {}
+  constructor(
+    private readonly submissionsService: SubmissionsService,
+    private readonly authService: AuthService,
+  ) {}
 
   @Get()
-  async list() {
-    return this.submissionsService.list();
+  async list(@Req() request: FastifyRequest) {
+    const user = await this.authService.requireUserFromRequest(request);
+    return this.submissionsService.list(user.id);
   }
 
   @Post()
-  async create(@Body() payload: CreateSubmissionRequest) {
-    return this.submissionsService.create(payload);
+  async create(@Req() request: FastifyRequest, @Body() payload: CreateSubmissionRequest) {
+    const user = await this.authService.requireUserFromRequest(request);
+    return this.submissionsService.create(user.id, payload);
   }
 
   @Get(":id")
