@@ -60,30 +60,30 @@ export function AuthForm({ initialMode, returnTo }: { initialMode: AuthMode; ret
   }
 
   return (
-    <div className="flex justify-center pt-8">
-      <Card className="w-full max-w-[520px] p-4">
-        <CardHeader className="text-left">
-          <Badge variant="secondary" className="w-fit mb-2 font-bold">账号</Badge>
+    <div className="flex justify-center pt-8 px-4">
+      <Card className="w-full max-w-[520px] shadow-lg border-border">
+        <CardHeader className="text-left space-y-2">
+          <Badge variant="secondary" className="w-fit font-bold">账号</Badge>
           <CardTitle className="text-2xl font-bold">{mode === "login" ? "欢迎回来" : "创建页码账号"}</CardTitle>
-          <CardDescription>
+          <CardDescription className="text-muted-foreground">
             {mode === "login"
               ? "登录后即可提交代码并查看你的评测记录。"
               : "注册账号后可以保存提交记录、评测报告和练习进度。"}
-          </Description>
+          </CardDescription>
         </CardHeader>
 
         <CardContent>
           <div className="grid grid-cols-2 gap-2 mb-6">
             <Button
               variant={mode === "login" ? "secondary" : "ghost"}
-              className={cn(mode === "login" && "bg-muted shadow-sm")}
+              className={cn(mode === "login" && "bg-muted shadow-sm font-bold")}
               onClick={() => setMode("login")}
             >
               登录
             </Button>
             <Button
               variant={mode === "register" ? "secondary" : "ghost"}
-              className={cn(mode === "register" && "bg-muted shadow-sm")}
+              className={cn(mode === "register" && "bg-muted shadow-sm font-bold")}
               onClick={() => setMode("register")}
             >
               注册
@@ -100,12 +100,12 @@ export function AuthForm({ initialMode, returnTo }: { initialMode: AuthMode; ret
             {mode === "register" ? (
               <div className="space-y-2">
                 <Label htmlFor="name">昵称</Label>
-                <Input id="name" name="name" type="text" minLength={2} required />
+                <Input id="name" name="name" type="text" minLength={2} required className="bg-muted/30 border-border focus-visible:ring-primary/20" />
               </div>
             ) : null}
             <div className="space-y-2">
               <Label htmlFor="email">邮箱</Label>
-              <Input id="email" name="email" type="email" autoComplete="email" required />
+              <Input id="email" name="email" type="email" autoComplete="email" required className="bg-muted/30 border-border focus-visible:ring-primary/20" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">密码</Label>
@@ -116,12 +116,13 @@ export function AuthForm({ initialMode, returnTo }: { initialMode: AuthMode; ret
                 minLength={8}
                 autoComplete={mode === "login" ? "current-password" : "new-password"}
                 required
+                className="bg-muted/30 border-border focus-visible:ring-primary/20"
               />
             </div>
 
-            {error ? <p className="text-sm font-bold text-destructive">{error}</p> : null}
+            {error ? <p className="text-sm font-bold text-destructive animate-pulse">{error}</p> : null}
 
-            <Button type="submit" className="w-full font-bold" disabled={isPending}>
+            <Button type="submit" className="w-full font-bold shadow-md hover:shadow-lg transition-all" disabled={isPending}>
               {mode === "login" ? (isPending ? "登录中..." : "登录") : isPending ? "注册中..." : "创建账号"}
             </Button>
           </form>

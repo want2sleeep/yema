@@ -1,35 +1,31 @@
-const AVATAR_PALETTE = [
-  ["#2563eb", "#60a5fa"],
-  ["#0f766e", "#34d399"],
-  ["#7c3aed", "#a78bfa"],
-  ["#b45309", "#f59e0b"],
-  ["#be123c", "#fb7185"],
-  ["#1d4ed8", "#38bdf8"],
-] as const;
+/**
+ * 使用 DiceBear HTTP API 生成用户头像。
+ * 详情参考: https://www.dicebear.com/introduction/
+ */
 
-function hashString(value: string) {
-  let hash = 0;
+type AvatarStyle = 
+  | "identicon" 
+  | "bottts-neutral" 
+  | "shapes" 
+  | "pixel-art" 
+  | "initials";
 
-  for (let index = 0; index < value.length; index += 1) {
-    hash = (hash * 31 + value.charCodeAt(index)) >>> 0;
-  }
-
-  return hash;
+/**
+ * 获取 DiceBear 头像 URL
+ * @param seed 唯一标识符（如邮箱或用户名）
+ * @param style 头像风格，默认为 identicon
+ */
+export function getAvatarUrl(seed: string, style: AvatarStyle = "identicon"): string {
+  const cleanSeed = encodeURIComponent(seed.trim().toLowerCase());
+  // 使用 9.x 版本的 API
+  return `https://api.dicebear.com/9.x/${style}/svg?seed=${cleanSeed}`;
 }
 
+/**
+ * 兼容旧代码：获取首字母
+ */
 export function getAvatarInitial(name: string, email: string) {
   const trimmedName = name.trim();
-
-  if (trimmedName) {
-    return trimmedName[0]?.toUpperCase() ?? "Y";
-  }
-
+  if (trimmedName) return trimmedName[0]?.toUpperCase() ?? "Y";
   return email.trim()[0]?.toUpperCase() ?? "Y";
-}
-
-export function getAvatarGradient(name: string, email: string) {
-  const seed = `${name}:${email}`;
-  const palette = AVATAR_PALETTE[hashString(seed) % AVATAR_PALETTE.length];
-
-  return `linear-gradient(135deg, ${palette[0]}, ${palette[1]})`;
 }
