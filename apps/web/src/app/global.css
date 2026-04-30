@@ -244,6 +244,13 @@ input {
   gap: 16px;
 }
 
+.empty-list-state {
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+  padding: 8px 4px;
+}
+
 .empty-state {
   padding: 32px;
 }
