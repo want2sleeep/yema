@@ -13,7 +13,7 @@ export class SubmissionsService {
     private readonly evaluationQueueService: EvaluationQueueService,
   ) {}
 
-  async create(payload: CreateSubmissionRequest) {
+  async create(userId: string, payload: CreateSubmissionRequest) {
     await this.problemsService.getById(payload.problemId);
     const submissionId = randomUUID();
 
@@ -21,7 +21,7 @@ export class SubmissionsService {
       data: {
         id: submissionId,
         problemId: payload.problemId,
-        userId: payload.userId,
+        userId,
         status: "queued",
         files: payload.files as any,
       },
@@ -46,8 +46,11 @@ export class SubmissionsService {
     };
   }
 
-  async list(): Promise<SubmissionSummary[]> {
+  async list(userId: string): Promise<SubmissionSummary[]> {
     const submissions = await this.prismaService.submission.findMany({
+      where: {
+        userId,
+      },
       orderBy: {
         createdAt: "desc",
       },

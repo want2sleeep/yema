@@ -1,29 +1,41 @@
-import "./globals.css";
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
+import { SessionControls } from "../components/session-controls";
+import { getOptionalSessionUser } from "../lib/auth";
+import "./global.css";
 
 export const metadata: Metadata = {
   title: "页码 - 前端智能判题系统",
-  description: "基于大语言模型的前端在线判题系统 MVP",
+  description: "面向前端练习场景的在线判题系统，支持账号登录、提交评测与结构化报告查看。",
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const user = await getOptionalSessionUser();
+
   return (
-    <html lang="zh-CN">
+    <html lang="zh-CN" suppressHydrationWarning>
       <body>
         <div className="app-shell">
           <header className="page-header">
-            <div>
-              <h1>页码：前端智能判题系统</h1>
-              <p className="muted">面向前端作业场景，支持结构化评分、页面渲染分析与智能教学反馈。</p>
+            <div className="brand-block">
+              <Image
+                src="/branding/yema-logo.png"
+                alt="Yema logo"
+                width={65}
+                height={32.5}
+                className="brand-logo-image"
+                priority
+              />
+              <p className="muted brand-summary">
+                面向前端练习场景，支持账号登录、代码提交、自动评测与结构化报告查看。
+              </p>
             </div>
             <div className="header-actions">
-              <Link href="/submissions" className="button secondary">
-                提交记录
-              </Link>
               <Link href="/" className="button secondary">
-                返回题目
+                题目列表
               </Link>
+              <SessionControls user={user} />
             </div>
           </header>
           {children}

@@ -8,9 +8,8 @@ async function bootstrap() {
     new FastifyAdapter(),
   );
 
-  app.enableCors({ origin: true });
+  app.enableCors({ origin: true, credentials: true });
   await app.listen(3001, "0.0.0.0");
 }
 
 bootstrap();
-

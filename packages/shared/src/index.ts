@@ -173,6 +173,27 @@ export type EvaluationReport = {
 
 export type CreateSubmissionRequest = {
   problemId: string;
-  userId: string;
   files: SubmissionFile[];
+};
+
+export type AuthUser = {
+  id: string;
+  email: string;
+  name: string;
+  createdAt: string;
+};
+
+export type RegisterRequest = {
+  email: string;
+  name: string;
+  password: string;
+};
+
+export type LoginRequest = {
+  email: string;
+  password: string;
+};
+
+export type AuthResponse = {
+  user: AuthUser;
 };
