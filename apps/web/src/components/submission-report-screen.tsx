@@ -51,24 +51,39 @@ export function SubmissionReportScreen({ submissionId }: { submissionId: string 
   }, [submission]);
 
   useEffect(() => {
-    const tipTimer = setInterval(() => {
-      setWaitTipIndex(prev => (prev + 1) % WAIT_TIPS.length);
-    }, 4000);
-    return () => clearInterval(tipTimer);
-  }, []);
+    setSubmission(null);
+    setReport(null);
+    setError(null);
+    setWaitTipIndex(0);
+  }, [submissionId]);
 
   useEffect(() => {
-    let cancelled = false;
+    const isWaiting = !report && !error && submission?.status !== "failed";
+    if (!isWaiting) {
+      return;
+    }
+
+    const tipTimer = window.setInterval(() => {
+      setWaitTipIndex((prev) => (prev + 1) % WAIT_TIPS.length);
+    }, 4000);
+
+    return () => window.clearInterval(tipTimer);
+  }, [error, report, submission?.status]);
+
+  useEffect(() => {
+    let isActive = true;
+
     async function load() {
       try {
         const currentSubmission = await getSubmission(submissionId);
-        if (cancelled) return;
+        if (!isActive) return;
         setSubmission(currentSubmission);
         setError(null);
 
         if (currentSubmission.status === "completed") {
           const currentReport = await tryGetReport(submissionId);
-          if (!cancelled) setReport(currentReport);
+          if (!isActive) return;
+          setReport(currentReport);
           return;
         }
 
@@ -76,17 +91,26 @@ export function SubmissionReportScreen({ submissionId }: { submissionId: string 
           setError("评测系统在执行过程中遇到严重错误，请检查代码或重试。");
         }
       } catch (loadError) {
-        if (!cancelled) setError(formatLoadError(loadError));
+        if (!isActive) return;
+        setError(formatLoadError(loadError));
       }
     }
 
     void load();
-    const timer = window.setInterval(() => void load(), 1500);
+    if (report) {
+      return () => {
+        isActive = false;
+      };
+    }
+
+    const timer = window.setInterval(() => {
+      void load();
+    }, 1500);
     return () => {
-      cancelled = true;
+      isActive = false;
       window.clearInterval(timer);
     };
-  }, [submissionId]);
+  }, [report, submissionId]);
 
   if (error) {
     return (

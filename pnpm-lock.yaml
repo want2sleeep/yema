@@ -108,9 +108,6 @@ importers:
       react-dom:
         specifier: ^19.0.0
         version: 19.2.4(react@19.2.4)
-      shadcn:
-        specifier: ^4.6.0
-        version: 4.6.0(@types/node@22.19.15)(typescript@5.9.3)
       tailwindcss-animate:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@4.2.4)
@@ -136,15 +133,15 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
-      lucide:
-        specifier: ^1.14.0
-        version: 1.14.0
       lucide-react:
         specifier: ^1.14.0
         version: 1.14.0(react@19.2.4)
       postcss:
         specifier: ^8.5.12
         version: 8.5.12
+      shadcn:
+        specifier: ^4.6.0
+        version: 4.6.0(@types/node@22.19.15)(typescript@5.9.3)
       tailwind-merge:
         specifier: ^3.5.0
         version: 3.5.0

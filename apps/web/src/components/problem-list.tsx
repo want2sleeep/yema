@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { ProblemSummary } from "@yema/shared";
-import { cn } from "@/lib/utils";
 import {
   Table,
   TableBody,
@@ -9,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 
 const difficultyLabelMap = {
   easy: "简单",
@@ -25,12 +24,12 @@ const difficultyColorMap = {
 
 export function ProblemList({ problems }: { problems: ProblemSummary[] }) {
   return (
-    <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
+    <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
       <Table>
         <TableHeader>
           <TableRow className="bg-muted/30">
             <TableHead className="w-20 text-center font-semibold">状态</TableHead>
-            <TableHead className="font-semibold text-left">题目</TableHead>
+            <TableHead className="text-left font-semibold">题目</TableHead>
             <TableHead className="w-32 text-center font-semibold">难度</TableHead>
             <TableHead className="w-32 text-center font-semibold">操作</TableHead>
           </TableRow>
@@ -43,10 +42,13 @@ export function ProblemList({ problems }: { problems: ProblemSummary[] }) {
               </TableCell>
               <TableCell className="text-left">
                 <div className="flex flex-col gap-1">
-                  <Link href={`/problems/${problem.id}`} className="font-bold text-foreground hover:text-primary transition-colors text-sm">
+                  <Link
+                    href={`/problems/${problem.id}`}
+                    className="text-sm font-bold text-foreground transition-colors hover:text-primary"
+                  >
                     {problem.title}
                   </Link>
-                  <span className="text-[12px] text-muted-foreground line-clamp-1">
+                  <span className="line-clamp-1 text-[12px] text-muted-foreground">
                     {problem.shortDescription}
                   </span>
                 </div>
@@ -57,11 +59,16 @@ export function ProblemList({ problems }: { problems: ProblemSummary[] }) {
                 </span>
               </TableCell>
               <TableCell className="text-center">
-                <Button asChild variant="outline" size="sm" className="h-8 text-xs font-bold">
-                  <Link href={`/problems/${problem.id}`}>
-                    开始作答
-                  </Link>
-                </Button>
+                <Link
+                  href={`/problems/${problem.id}`}
+                  className={buttonVariants({
+                    variant: "outline",
+                    size: "sm",
+                    className: "h-8 text-xs font-bold",
+                  })}
+                >
+                  开始作答
+                </Link>
               </TableCell>
             </TableRow>
           ))}
