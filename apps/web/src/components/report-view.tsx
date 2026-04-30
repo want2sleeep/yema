@@ -1,6 +1,12 @@
+"use client";
+
 import Link from "next/link";
 import { EvaluationReport, Submission } from "@yema/shared";
 import { formatSubmissionStatus } from "../lib/submission-status";
+import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 const categoryLabelMap = {
   static: "静态分析",
@@ -42,117 +48,144 @@ function resolveArtifactUrl(value?: string) {
 }
 
 export function ReportView({ submission, report }: { submission: Submission; report: EvaluationReport }) {
+  const isCompleted = submission.status === "completed";
+
   return (
-    <section className="grid">
-      <article className="panel report-card">
-        <div className="pill">提交报告</div>
-        <h2>结构化评测报告</h2>
-        <p className="status">当前状态：{formatSubmissionStatus(submission.status)}</p>
-        <div className="score">{report.totalScore} 分</div>
-        <p className="muted">{t(report.summary)}</p>
-        <div className="meta-grid">
-          <div className="evidence-item">
-            <h3>功能正确性</h3>
-            <p>
-              {report.dimensions.correctness.score} / {report.dimensions.correctness.maxScore}
-            </p>
-            <p className="muted">{t(report.dimensions.correctness.summary)}</p>
-          </div>
-          <div className="evidence-item">
-            <h3>代码质量</h3>
-            <p>
-              {report.dimensions.codeQuality.score} / {report.dimensions.codeQuality.maxScore}
-            </p>
-            <p className="muted">{t(report.dimensions.codeQuality.summary)}</p>
-          </div>
-          <div className="evidence-item">
-            <h3>页面渲染</h3>
-            <p>
-              {report.dimensions.uiRendering.score} / {report.dimensions.uiRendering.maxScore}
-            </p>
-            <p className="muted">{t(report.dimensions.uiRendering.summary)}</p>
-          </div>
-          <div className="evidence-item">
-            <h3>工程规范</h3>
-            <p>
-              {report.dimensions.engineering.score} / {report.dimensions.engineering.maxScore}
-            </p>
-            <p className="muted">{t(report.dimensions.engineering.summary)}</p>
-          </div>
+    <section className="flex flex-col gap-6">
+      <Card className="flex items-center justify-between p-8">
+        <div>
+          <Badge className={cn(
+            "mb-3 font-bold uppercase",
+            isCompleted ? "bg-green-100 text-green-700 hover:bg-green-200" : "bg-amber-100 text-amber-700 hover:bg-amber-200"
+          )} variant="secondary">
+            {formatSubmissionStatus(submission.status)}
+          </Badge>
+          <div className="my-4 text-6xl font-extrabold tracking-tight text-foreground">{report.totalScore}</div>
+          <div className="text-sm font-medium text-muted-foreground">综合得分（百分制）</div>
         </div>
-      </article>
-
-      <article className="panel report-card">
-        <h3>证据项</h3>
-        <div className="evidence-list">
-          {report.evidence.map((item) => (
-            <div key={item.id} className="evidence-item">
-              <strong>{item.title}</strong>
-              <p>{item.detail}</p>
-              <p className="muted">
-                类别：{categoryLabelMap[item.category]} | 分值影响：{item.scoreImpact}
-              </p>
+        <div className="flex gap-8">
+          {[
+            { label: "功能", value: report.dimensions.correctness.score },
+            { label: "代码", value: report.dimensions.codeQuality.score },
+            { label: "渲染", value: report.dimensions.uiRendering.score },
+            { label: "规范", value: report.dimensions.engineering.score },
+          ].map((stat) => (
+            <div key={stat.label} className="flex flex-col gap-1 text-center">
+              <div className="text-xl font-bold">{stat.value}</div>
+              <div className="text-xs text-muted-foreground">{stat.label}</div>
             </div>
           ))}
         </div>
-      </article>
+      </Card>
 
-      <article className="panel report-card">
-        <h3>渲染截图</h3>
-        {report.artifacts?.screenshotUrl ? (
-          <div className="render-artifact">
-            <img src={resolveArtifactUrl(report.artifacts.screenshotUrl)} alt="提交页面渲染截图" className="render-image" />
-          </div>
-        ) : (
-          <p className="muted">当前提交暂时还没有可用的截图产物。</p>
-        )}
-        {report.renderDetails ? (
-          <div className="evidence-list">
-            <div className="evidence-item">
-              <strong>渲染状态</strong>
-              <p>{report.renderDetails.renderOk ? "Playwright 检查通过" : "Playwright 发现渲染问题"}</p>
-              <p className="muted">
-                缺失选择器：
-                {report.renderDetails.missingSelectors.length > 0 ? report.renderDetails.missingSelectors.join(", ") : "无"}
-              </p>
-              <p className="muted">
-                缺失文本：
-                {report.renderDetails.missingTexts.length > 0 ? report.renderDetails.missingTexts.join(", ") : "无"}
-              </p>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {[
+          { label: "功能完成度", dim: report.dimensions.correctness },
+          { label: "代码质量", dim: report.dimensions.codeQuality },
+          { label: "页面渲染", dim: report.dimensions.uiRendering },
+          { label: "工程规范", dim: report.dimensions.engineering },
+        ].map((item) => (
+          <Card key={item.label} className="flex flex-col gap-3 p-6">
+            <div className="flex items-center justify-between">
+              <strong className="text-sm">{item.label}</strong>
+              <span className="text-xs text-muted-foreground">{item.dim.score}/{item.dim.maxScore}</span>
             </div>
-            <div className="evidence-item">
-              <strong>浏览器诊断</strong>
-              <p>{report.renderDetails.loadError ?? "页面已在 Chromium 中成功加载。"}</p>
-              <p className="muted">
-                控制台错误：
-                {report.renderDetails.consoleErrors.length > 0 ? report.renderDetails.consoleErrors.join(" | ") : "无"}
-              </p>
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+              <div 
+                className="h-full bg-primary transition-all" 
+                style={{ width: `${(item.dim.score / item.dim.maxScore) * 100}%` }}
+              />
             </div>
-          </div>
-        ) : null}
-      </article>
+            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{t(item.dim.summary)}</p>
+          </Card>
+        ))}
+      </div>
 
-      <article className="panel report-card">
-        <h3>改进建议</h3>
-        <div className="tips-list">
-          {report.suggestions.map((tip) => (
-            <div className="tip-item" key={tip}>
-              {tip}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <Card className="p-6">
+          <CardHeader className="p-0 mb-4">
+            <CardTitle className="text-lg font-bold">评测证据</CardTitle>
+          </CardHeader>
+          <CardContent className="p-0 flex flex-col gap-3">
+            {report.evidence.map((item) => (
+              <div key={item.id} className="rounded-lg border bg-muted/20 p-4 transition-colors hover:bg-muted/30">
+                <div className="mb-1 flex items-center justify-between">
+                  <strong className="text-sm">{item.title}</strong>
+                  <span className={cn(
+                    "text-xs font-bold",
+                    item.scoreImpact < 0 ? "text-red-600" : "text-green-600"
+                  )}>
+                    {item.scoreImpact > 0 ? "+" : ""}{item.scoreImpact}
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground">{item.detail}</p>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        <Card className="p-6">
+          <CardHeader className="p-0 mb-4">
+            <CardTitle className="text-lg font-bold">智能反馈</CardTitle>
+          </CardHeader>
+          <CardContent className="p-0 flex flex-col gap-4">
+            {report.llmFeedback ? (
+              <div className="flex flex-col gap-4">
+                <div className="rounded-lg bg-blue-50 p-4">
+                  <Badge variant="secondary" className="mb-2 bg-blue-100 text-blue-700 hover:bg-blue-200 text-[10px] font-bold uppercase">AI 总结</Badge>
+                  <p className="text-sm leading-relaxed text-blue-900">{report.llmFeedback.summary}</p>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-lg bg-green-50 p-4">
+                    <div className="mb-2 text-xs font-bold text-green-700">优势</div>
+                    <ul className="list-inside list-disc space-y-1 text-xs text-green-700/80">
+                      {report.llmFeedback.strengths.map((s, i) => <li key={i}>{s}</li>)}
+                    </ul>
+                  </div>
+                  <div className="rounded-lg bg-amber-50 p-4">
+                    <div className="mb-2 text-xs font-bold text-amber-700">建议</div>
+                    <ul className="list-inside list-disc space-y-1 text-xs text-amber-700/80">
+                      {report.llmFeedback.weaknesses.map((w, i) => <li key={i}>{w}</li>)}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="flex h-32 items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground">
+                正在生成智能反馈...
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card className="p-6">
+        <CardHeader className="p-0 mb-4">
+          <CardTitle className="text-lg font-bold">渲染截图</CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          {report.artifacts?.screenshotUrl ? (
+            <div className="my-4 overflow-hidden rounded-lg border bg-muted/20">
+              <img 
+                src={resolveArtifactUrl(report.artifacts.screenshotUrl)} 
+                alt="提交页面渲染截图" 
+                className="mx-auto block h-auto max-w-full shadow-lg" 
+              />
             </div>
-          ))}
-        </div>
-        {report.llmFeedback ? (
-          <>
-            <h3>智能反馈摘要</h3>
-            <p>{report.llmFeedback.summary}</p>
-            <p className="muted">优点：{report.llmFeedback.strengths.join("；")}</p>
-            <p className="muted">不足：{report.llmFeedback.weaknesses.join("；")}</p>
-          </>
-        ) : null}
-        <Link href={`/problems/${report.problemId}`} className="button">
-          返回作答页
-        </Link>
-      </article>
+          ) : (
+            <div className="flex h-40 items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground">
+              暂无截图产物。
+            </div>
+          )}
+          <div className="mt-8 flex justify-end">
+            <Button asChild size="lg" className="font-bold">
+              <Link href={`/problems/${report.problemId}`}>
+                返回题目页
+              </Link>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </section>
   );
 }
