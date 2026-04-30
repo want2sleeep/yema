@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 
 const textTranslationMap: Record<string, string> = {
   "This submission already forms a fairly complete page implementation and is ready for refinement.":
@@ -89,12 +90,7 @@ export function ReportView({ submission, report }: { submission: Submission; rep
                 {item.dim.score}/{item.dim.maxScore}
               </span>
             </div>
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-              <div
-                className="h-full bg-primary transition-all"
-                style={{ width: `${(item.dim.score / item.dim.maxScore) * 100}%` }}
-              />
-            </div>
+            <Progress value={(item.dim.score / item.dim.maxScore) * 100} />
             <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{t(item.dim.summary)}</p>
           </Card>
         ))}

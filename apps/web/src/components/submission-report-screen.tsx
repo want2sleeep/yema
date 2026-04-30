@@ -166,24 +166,24 @@ export function SubmissionReportScreen({ submissionId }: { submissionId: string 
                 const Icon = step.icon;
 
                 return (
-                  <div 
-                    key={step.id} 
+                  <div
+                    key={step.id}
                     className={cn(
                       "flex items-center gap-4 p-4 rounded-xl border transition-all duration-300",
-                      isActive ? "bg-primary/5 border-primary/20 shadow-sm scale-[1.02]" : 
-                      isDone ? "bg-green-50/50 border-green-100 opacity-80" : "bg-muted/30 border-transparent opacity-40"
+                      isActive ? "bg-primary/5 border-primary/20 shadow-sm scale-[1.02]" :
+                      isDone ? "bg-secondary border-border opacity-80" : "bg-muted/30 border-transparent opacity-40"
                     )}
                   >
                     <div className={cn(
                       "p-2 rounded-lg",
-                      isActive ? "bg-primary text-primary-foreground animate-pulse" : 
-                      isDone ? "bg-green-100 text-green-600" : "bg-muted text-muted-foreground"
+                      isActive ? "bg-primary text-primary-foreground animate-pulse" :
+                      isDone ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
                     )}>
                       {isDone ? <CheckCircle2 className="h-5 w-5" /> : <Icon className="h-5 w-5" />}
                     </div>
                     <span className={cn(
                       "text-sm font-bold",
-                      isActive ? "text-primary" : isDone ? "text-green-700" : "text-muted-foreground"
+                      isActive ? "text-primary" : isDone ? "text-foreground" : "text-muted-foreground"
                     )}>
                       {step.label}
                     </span>
@@ -192,8 +192,8 @@ export function SubmissionReportScreen({ submissionId }: { submissionId: string 
               })}
             </div>
 
-            <div className="rounded-lg bg-blue-50/50 border border-blue-100 p-6 text-center transition-all duration-500 min-h-[100px] flex items-center justify-center">
-              <p className="text-sm font-medium text-blue-700 leading-relaxed italic">
+            <div className="flex min-h-[100px] items-center justify-center rounded-lg border border-border bg-muted/40 p-6 text-center transition-all duration-500">
+              <p className="text-sm font-medium leading-relaxed italic text-muted-foreground">
                 “ {WAIT_TIPS[tipIndex]} ”
               </p>
             </div>
