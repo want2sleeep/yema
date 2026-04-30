@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="512"
+     height="512"
+     viewBox="250 140 590 590"
+     preserveAspectRatio="xMidYMid meet"
+     role="img"
+     aria-label="Yema OJ logo"><title>Yema OJ logo</title>
+<defs>
+  <linearGradient id="blueMain" x1="302" y1="163" x2="600" y2="720" gradientUnits="userSpaceOnUse">
+    <stop offset="0" stop-color="#2978f6"/>
+    <stop offset="0.52" stop-color="#1d66e6"/>
+    <stop offset="1" stop-color="#1454d2"/>
+  </linearGradient>
+  <linearGradient id="blueMain2" x1="300" y1="500" x2="565" y2="722" gradientUnits="userSpaceOnUse">
+    <stop offset="0" stop-color="#1762e2"/>
+    <stop offset="1" stop-color="#0e4dc2"/>
+  </linearGradient>
+  <linearGradient id="pageLight" x1="642" y1="188" x2="798" y2="575" gradientUnits="userSpaceOnUse">
+    <stop offset="0" stop-color="#dceaff"/>
+    <stop offset="1" stop-color="#b7d1fb"/>
+  </linearGradient>
+  <linearGradient id="pageBottom" x1="642" y1="497" x2="792" y2="687" gradientUnits="userSpaceOnUse">
+    <stop offset="0" stop-color="#d4e4ff"/>
+    <stop offset="1" stop-color="#a9c5f7"/>
+  </linearGradient>
+  <filter id="softShadow" x="-12%" y="-12%" width="124%" height="124%">
+    <feDropShadow dx="8" dy="10" stdDeviation="12" flood-color="#0a356f" flood-opacity="0.12"/>
+  </filter>
+  <clipPath id="clipBackPage">
+    <path d="M 641 244 L 775 194 Q 796 187 797 209 L 797 493 L 641 577 Z"/>
+  </clipPath>
+</defs>
+<g filter="url(#softShadow)">
+  <path d="M 641 244 L 775 194 Q 796 187 797 209 L 797 493 L 641 577 Z" fill="url(#pageLight)"/>
+  <g clip-path="url(#clipBackPage)">
+    <rect x="665" y="319" width="120" height="21" rx="10.5" fill="#9ec0f7"/>
+    <rect x="665" y="383" width="120" height="21" rx="10.5" fill="#9ec0f7"/>
+    <rect x="665" y="446" width="81" height="21" rx="10.5" fill="#9ec0f7"/>
+  </g>
+  <path d="M 641 577 L 797 493 L 797 590 Q 797 600 788 605 L 560 728 L 560 625 Z" fill="url(#pageBottom)"/>
+  <path d="M 303 271 L 623 160 Q 641 153 641 173 L 641 579 L 560 626 L 560 724 Q 560 735 548 728 L 303 598 Q 292 592 292 578 L 292 290 Q 292 277 303 271 Z" fill="url(#blueMain)"/>
+  <path d="M 292 500 L 560 626 L 560 724 Q 560 735 548 728 L 303 598 Q 292 592 292 578 Z" fill="url(#blueMain2)" opacity="0.88"/>
+  <path d="M 292 493 L 482 583" stroke="#ffffff" stroke-width="14" stroke-linecap="round"/>
+  <path d="M 601 583 L 797 492" stroke="#ffffff" stroke-width="14" stroke-linecap="round"/>
+  <g fill="none" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 393 339 L 350 382 L 393 424" stroke-width="24"/>
+    <path d="M 505 339 L 548 382 L 505 424" stroke-width="24"/>
+    <path d="M 470 306 L 433 455" stroke-width="24"/>
+  </g>
+  <circle cx="543" cy="600" r="66" fill="#ffffff"/>
+  <path d="M 510 600 L 535 624 L 584 573" fill="none" stroke="#1f6eea" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+</svg>

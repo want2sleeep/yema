@@ -6,6 +6,11 @@
         "name": "next"
       }
     ],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@yema/shared": ["../../packages/shared/src/index.ts"]
+    },
     "jsx": "preserve",
     "allowJs": true,
     "incremental": true
