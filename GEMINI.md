@@ -18,7 +18,7 @@ The project is a monorepo managed by `pnpm` workspaces:
 ### Key Technologies
 
 - **Backend:** NestJS, Prisma (PostgreSQL), BullMQ (Redis) for async evaluation, Playwright for render analysis, Ollama for local LLM integration.
-- **Frontend:** Next.js (App Router), React, Monaco Editor, Vanilla CSS.
+- **Frontend:** Next.js (App Router), React, Monaco Editor, Tailwind CSS v4, shadcn/ui.
 - **Shared:** TypeScript.
 - **Package Manager:** `pnpm`.
 
@@ -58,12 +58,12 @@ The core logic resides in `apps/server/src/evaluation`. The pipeline consists of
 - **Environment Variables:**
     - Root `.env` or `apps/server/.env` for `DATABASE_URL`, `REDIS_HOST`, `REDIS_PORT`, `OLLAMA_BASE_URL`, etc.
 - **Prisma:** Always run `prisma:generate` after schema changes.
-- **Styling:** The frontend uses Vanilla CSS; avoid introducing heavy CSS frameworks unless requested.
+- **Styling:** The frontend uses Tailwind CSS v4 with shadcn/ui components. Use shadcn/ui component primitives and Tailwind utility classes for all new UI work. Avoid raw inline styles or legacy custom CSS unless absolutely necessary.
 - **UI Design Patterns:**
     - **Problem List:** Prefer table layouts with Status, Title, and Difficulty columns.
     - **Workspace:** Prefer a split-pane layout with a 450px sidebar on the left and a code editor on the right.
-    - **Status Colors:**
-        - Easy: Green (`--success`)
-        - Medium: Orange (`--warning`)
-        - Hard: Red (`--danger`)
+    - **Status Colors:** Use semantic Tailwind tokens or shadcn/ui `Badge` variants rather than hard-coded color classes:
+        - Easy: Green (e.g. `variant="success"` or `text-green-600`)
+        - Medium: Orange (e.g. `variant="warning"` or `text-orange-500`)
+        - Hard: Red (e.g. `variant="destructive"` or `text-red-600`)
     - **Report:** Use visual statistics (big score badges, progress bars) to represent evaluation dimensions.
