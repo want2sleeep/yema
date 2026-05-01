@@ -16,6 +16,7 @@ export class DatabaseSeedService implements OnModuleInit {
           id: problem.id,
           title: problem.title,
           difficulty: problem.difficulty,
+          tags: problem.tags,
           shortDescription: problem.shortDescription,
           description: problem.description,
           templateFiles: problem.templateFiles as any,
@@ -24,6 +25,7 @@ export class DatabaseSeedService implements OnModuleInit {
         update: {
           title: problem.title,
           difficulty: problem.difficulty,
+          tags: problem.tags,
           shortDescription: problem.shortDescription,
           description: problem.description,
           templateFiles: problem.templateFiles as any,

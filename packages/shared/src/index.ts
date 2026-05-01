@@ -56,6 +56,7 @@ export type ProblemSummary = {
   difficulty: "easy" | "medium" | "hard";
   shortDescription: string;
   tags: string[];
+  status?: "solved" | "attempted" | "unstarted";
 };
 
 export type Problem = ProblemSummary & {
