@@ -22,6 +22,22 @@ type RequestOptions = {
   cookieHeader?: string;
 };
 
+export type FavoriteProblemSummary = ProblemSummary & {
+  isFavorite?: boolean;
+};
+
+type FavoriteListResponse =
+  | FavoriteProblemSummary[]
+  | { favorites: FavoriteProblemSummary[] }
+  | { problems: FavoriteProblemSummary[] }
+  | { items: FavoriteProblemSummary[] };
+
+type FavoriteListEnvelope = {
+  favorites?: unknown[];
+  problems?: unknown[];
+  items?: unknown[];
+};
+
 async function request<T>(path: string, init?: RequestInit, options?: RequestOptions): Promise<T> {
   const headers: Record<string, string> = {
     ...(options?.cookieHeader ? { Cookie: options.cookieHeader } : {}),
@@ -43,7 +59,21 @@ async function request<T>(path: string, init?: RequestInit, options?: RequestOpt
     throw new ApiError(response.status, `Request failed: ${response.status}`);
   }
 
-  return response.json() as Promise<T>;
+  if (response.status === 204) {
+    return undefined as T;
+  }
+
+  const contentType = response.headers.get("content-type");
+  if (!contentType?.includes("application/json")) {
+    return undefined as T;
+  }
+
+  const text = await response.text();
+  if (!text) {
+    return undefined as T;
+  }
+
+  return JSON.parse(text) as T;
 }
 
 export function getProblems() {
@@ -52,6 +82,81 @@ export function getProblems() {
 
 export function getProblem(id: string) {
   return request<Problem>(`/problems/${id}`);
+}
+
+function normalizeFavoriteProblem(problem: unknown): FavoriteProblemSummary | null {
+  const candidate =
+    problem && typeof problem === "object" && "problem" in problem
+      ? (problem as { problem: unknown }).problem
+      : problem;
+
+  if (!candidate || typeof candidate !== "object") {
+    return null;
+  }
+
+  const favorite = candidate as Partial<ProblemSummary>;
+  const difficulty =
+    favorite.difficulty === "easy" || favorite.difficulty === "medium" || favorite.difficulty === "hard"
+      ? favorite.difficulty
+      : null;
+
+  if (!difficulty || typeof favorite.id !== "string" || typeof favorite.title !== "string") {
+    return null;
+  }
+
+  return {
+    id: favorite.id,
+    title: favorite.title,
+    difficulty,
+    shortDescription: typeof favorite.shortDescription === "string" ? favorite.shortDescription : "",
+    tags: Array.isArray(favorite.tags)
+      ? favorite.tags.filter((tag): tag is string => typeof tag === "string")
+      : [],
+    status:
+      favorite.status === "solved" || favorite.status === "attempted" || favorite.status === "unstarted"
+        ? favorite.status
+        : undefined,
+    isFavorite: true,
+  };
+}
+
+function normalizeFavoriteProblems(payload: FavoriteListResponse): FavoriteProblemSummary[] {
+  let items: unknown[] = [];
+
+  if (Array.isArray(payload)) {
+    items = payload;
+  } else {
+    const envelope = payload as FavoriteListEnvelope;
+
+    if (Array.isArray(envelope.favorites)) {
+      items = envelope.favorites;
+    } else if (Array.isArray(envelope.problems)) {
+      items = envelope.problems;
+    } else if (Array.isArray(envelope.items)) {
+      items = envelope.items;
+    }
+  }
+
+  return items
+    .map((problem: unknown) => normalizeFavoriteProblem(problem))
+    .filter((problem): problem is FavoriteProblemSummary => problem !== null);
+}
+
+export async function getFavorites(cookieHeader?: string) {
+  const payload = await request<FavoriteListResponse>("/favorites", undefined, { cookieHeader });
+  return normalizeFavoriteProblems(payload);
+}
+
+export function addFavorite(problemId: string) {
+  return request<void>(`/favorites/${problemId}`, {
+    method: "POST",
+  });
+}
+
+export function removeFavorite(problemId: string) {
+  return request<void>(`/favorites/${problemId}`, {
+    method: "DELETE",
+  });
 }
 
 export function createSubmission(payload: CreateSubmissionRequest) {
