@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { FileText, Heart, List, UserRound, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -70,7 +69,7 @@ function NavigationSection({
         const Icon = item.icon;
 
         return (
-          <Link
+          <a
             key={item.href}
             href={item.href}
             aria-current={active ? "page" : undefined}
@@ -98,7 +97,7 @@ function NavigationSection({
                 {item.description}
               </span>
             </span>
-          </Link>
+          </a>
         );
       })}
     </div>
