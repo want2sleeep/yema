@@ -1,7 +1,7 @@
 import { Controller, Get, Param, Req } from "@nestjs/common";
 import { ProblemsService } from "./problems.service.js";
 import { AuthService } from "../auth/auth.service.js";
-import { FastifyRequest } from "fastify";
+import type { FastifyRequest } from "fastify";
 
 @Controller("api/problems")
 export class ProblemsController {
