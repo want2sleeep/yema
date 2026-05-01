@@ -23,15 +23,18 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <div className="app-shell">
           <header className="flex h-16 items-center justify-between border-b border-border px-4 sm:px-6">
             <div className="flex items-center gap-6">
-              <Link href="/" className="flex shrink-0 items-center">
+              <Link href="/" className="flex shrink-0 items-center gap-2.5 group">
                 <Image
-                  src="/branding/yema-logo-with-words.png"
+                  src="/branding/yema-logo-only-icon.svg"
                   alt="Yema logo"
-                  width={100}
+                  width={32}
                   height={32}
-                  className="h-7 w-auto"
+                  className="h-8 w-8 transition-transform group-hover:scale-105"
                   priority
                 />
+                <span className="text-xl font-black tracking-tighter text-primary">
+                  页码 <span className="text-foreground/80">OJ</span>
+                </span>
               </Link>
               <div className="hidden h-4 w-px bg-border md:block" />
               <p className="hidden whitespace-nowrap text-sm text-muted-foreground lg:block">
