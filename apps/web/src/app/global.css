@@ -125,7 +125,7 @@
 
 /* 兼容业务类 */
 .app-shell {
-  @apply mx-auto py-6 pb-12 w-[min(1200px,calc(100vw-32px))];
+  @apply mx-auto flex min-h-screen w-full max-w-[1360px] flex-col px-4 py-4 pb-8 sm:px-6 lg:px-8;
 }
 
 .page-header {

@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
-import Image from "next/image";
-import Link from "next/link";
-import { SessionControls } from "../components/session-controls";
+import { AppShell } from "../components/app-shell";
 import { getOptionalSessionUser } from "../lib/auth";
 import "./global.css";
 import { Geist } from "next/font/google";
@@ -20,50 +18,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   return (
     <html lang="zh-CN" suppressHydrationWarning className={cn("font-sans", geist.variable)}>
       <body className="min-h-screen bg-background text-foreground">
-        <div className="app-shell">
-          <header className="flex h-16 items-center justify-between border-b border-border px-4 sm:px-6">
-            <div className="flex items-center gap-6">
-              <Link href="/" className="flex shrink-0 items-center gap-2.5 group">
-                <Image
-                  src="/branding/yema-logo-only-icon.svg"
-                  alt="Yema logo"
-                  width={32}
-                  height={32}
-                  className="h-8 w-8 transition-transform group-hover:scale-105"
-                  priority
-                />
-                <span className="text-xl font-black tracking-tighter text-primary">
-                  页码 <span className="text-foreground/80">OJ</span>
-                </span>
-              </Link>
-              <div className="hidden h-4 w-px bg-border md:block" />
-              <p className="hidden whitespace-nowrap text-sm text-muted-foreground lg:block">
-                面向前端练习场景的智能评测系统
-              </p>
-            </div>
-
-            <nav className="flex items-center gap-1">
-              <Link 
-                href="/" 
-                className="whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              >
-                题目列表
-              </Link>
-              <Link 
-                href="/submissions" 
-                className="whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              >
-                我的提交
-              </Link>
-              <div className="mx-3 h-4 w-px bg-border" />
-              <SessionControls user={user} />
-            </nav>
-          </header>
-
-          <main className="flex flex-col gap-8">
-            {children}
-          </main>
-        </div>
+        <AppShell user={user}>{children}</AppShell>
       </body>
     </html>
   );
