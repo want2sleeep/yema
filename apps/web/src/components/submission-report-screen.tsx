@@ -114,7 +114,7 @@ export function SubmissionReportScreen({ submissionId }: { submissionId: string 
 
   if (error) {
     return (
-      <div className="flex justify-center py-12">
+      <div className="container mx-auto flex justify-center py-12 px-4">
         <Card className="w-full max-w-2xl border-destructive/20 bg-destructive/5 shadow-lg">
           <CardHeader className="text-center">
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10 text-destructive">
@@ -131,7 +131,7 @@ export function SubmissionReportScreen({ submissionId }: { submissionId: string 
   if (!submission || !report) {
     const currentStatus = submission?.status ?? "queued";
     return (
-      <div className="flex flex-col items-center justify-center py-12 px-4 space-y-8">
+      <div className="container mx-auto flex flex-col items-center justify-center py-12 px-4 space-y-8">
         <Card className="w-full max-w-2xl shadow-xl border-border bg-card">
           <CardHeader className="text-center pb-2">
             <div className="flex justify-between items-center mb-4">

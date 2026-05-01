@@ -60,7 +60,7 @@ export function AuthForm({ initialMode, returnTo }: { initialMode: AuthMode; ret
   }
 
   return (
-    <div className="flex justify-center pt-8 px-4">
+    <div className="container mx-auto flex justify-center py-12 px-4 md:py-16">
       <Card className="w-full max-w-[520px] shadow-lg border-border">
         <CardHeader className="text-left space-y-2">
           <Badge variant="secondary" className="w-fit font-bold">账号</Badge>
