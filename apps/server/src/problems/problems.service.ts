@@ -6,12 +6,29 @@ import { PrismaService } from "../database/prisma.service.js";
 export class ProblemsService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async list(): Promise<ProblemSummary[]> {
+  async list(userId?: string): Promise<ProblemSummary[]> {
     const problems = await this.prismaService.problem.findMany({
       orderBy: {
         createdAt: "asc",
       },
     });
+
+    let userSubmissions: Record<string, "solved" | "attempted"> = {};
+
+    if (userId) {
+      const submissions = await this.prismaService.submission.findMany({
+        where: { userId },
+        select: { problemId: true, status: true },
+      });
+
+      for (const sub of submissions) {
+        if (sub.status === "completed") {
+          userSubmissions[sub.problemId] = "solved";
+        } else if (!userSubmissions[sub.problemId]) {
+          userSubmissions[sub.problemId] = "attempted";
+        }
+      }
+    }
 
     return problems.map((problem) => ({
       id: problem.id,
@@ -19,6 +36,7 @@ export class ProblemsService {
       difficulty: problem.difficulty as ProblemSummary["difficulty"],
       shortDescription: problem.shortDescription,
       tags: problem.tags,
+      status: userSubmissions[problem.id] ?? "unstarted",
     }));
   }
 
