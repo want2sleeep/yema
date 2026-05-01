@@ -1,3 +1,4 @@
+import { resolve } from "node:path";
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { ArtifactsController } from "./common/artifacts.controller.js";
@@ -15,6 +16,8 @@ import { FavoritesModule } from "./favorites/favorites.module.js";
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      // Support both repo-root runs and package-scoped runs like `pnpm --filter @yema/server start:dev`.
+      envFilePath: [resolve(process.cwd(), ".env"), resolve(process.cwd(), "../../.env")],
     }),
     DatabaseModule,
     ProblemsModule,
