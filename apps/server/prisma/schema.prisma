@@ -18,6 +18,7 @@ model Problem {
   config           Json
   createdAt        DateTime    @default(now())
   updatedAt        DateTime    @updatedAt
+  favorites        Favorite[]
   submissions      Submission[]
   reports          EvaluationReport[]
 }
@@ -29,7 +30,18 @@ model User {
   passwordHash String
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
+  favorites    Favorite[]
   sessions     Session[]
+}
+
+model Favorite {
+  userId    String
+  problemId String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problem   Problem  @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@id([userId, problemId])
 }
 
 model Session {

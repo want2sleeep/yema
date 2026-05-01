@@ -9,6 +9,7 @@ import { SubmissionsModule } from "./submissions/submissions.module.js";
 import { EvaluationModule } from "./evaluation/evaluation.module.js";
 import { RuntimeStorageService } from "./storage/runtime-storage.service.js";
 import { AuthModule } from "./auth/auth.module.js";
+import { FavoritesModule } from "./favorites/favorites.module.js";
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { AuthModule } from "./auth/auth.module.js";
     QueueModule,
     SubmissionsModule,
     AuthModule,
+    FavoritesModule,
   ],
   controllers: [HealthController, ArtifactsController],
   providers: [RuntimeStorageService],

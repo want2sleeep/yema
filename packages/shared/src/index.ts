@@ -65,6 +65,10 @@ export type Problem = ProblemSummary & {
   config: ProblemConfig;
 };
 
+export type FavoriteProblem = ProblemSummary;
+
+export type FavoritesListResponse = FavoriteProblem[];
+
 export type SubmissionFile = {
   path: string;
   content: string;
