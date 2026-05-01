@@ -84,7 +84,7 @@ export function ProblemList({ problems }: { problems: ProblemSummary[] }) {
                   "px-4 py-1.5 text-sm font-medium transition-all rounded-full border",
                   selectedCategory === category
                     ? "bg-primary text-primary-foreground border-primary shadow-sm"
-                    : "bg-background text-muted-foreground hover:bg-muted hover:text-foreground border-input"
+                    : "bg-background text-muted-foreground hover:border-primary hover:text-primary border-input"
                 )}
               >
                 {category}
