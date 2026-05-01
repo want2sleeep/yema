@@ -5,7 +5,7 @@ import { FileText, Heart, List, UserRound, type LucideIcon } from "lucide-react"
 import { cn } from "@/lib/utils";
 
 type NavItem = {
-  href: string;
+  href: "/" | "/submissions" | "/favorites" | "/profile";
   label: string;
   description: string;
   icon: LucideIcon;
