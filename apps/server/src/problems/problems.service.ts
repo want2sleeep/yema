@@ -18,6 +18,7 @@ export class ProblemsService {
       title: problem.title,
       difficulty: problem.difficulty as ProblemSummary["difficulty"],
       shortDescription: problem.shortDescription,
+      tags: problem.tags,
     }));
   }
 
@@ -35,6 +36,7 @@ export class ProblemsService {
       title: problem.title,
       difficulty: problem.difficulty as ProblemSummary["difficulty"],
       shortDescription: problem.shortDescription,
+      tags: problem.tags,
       description: problem.description,
       templateFiles: problem.templateFiles as Problem["templateFiles"],
       config: problem.config as Problem["config"],

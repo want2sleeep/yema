@@ -11,6 +11,7 @@ model Problem {
   id               String      @id
   title            String
   difficulty       String
+  tags             String[]
   shortDescription String
   description      String
   templateFiles    Json

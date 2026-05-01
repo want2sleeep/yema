@@ -5,6 +5,7 @@ export const problemSeeds: Problem[] = [
     id: "login-card",
     title: "实现登录卡片页面",
     difficulty: "easy",
+    tags: ["HTML", "CSS"],
     shortDescription: "实现一个居中的登录卡片，包含标题、两个输入框和一个提交按钮。",
     description:
       "请完成一个登录卡片页面。页面中至少要有主标题、用户名输入框、密码输入框和登录按钮，并保持基础的居中布局与清晰层次。",
@@ -179,6 +180,7 @@ export const problemSeeds: Problem[] = [
     id: "todo-board",
     title: "实现待办事项面板",
     difficulty: "medium",
+    tags: ["HTML", "CSS", "JavaScript"],
     shortDescription: "实现一个待办事项面板，包含输入区、添加按钮和任务列表。",
     description:
       "请完成一个简洁的待办事项面板。页面中至少要有标题、输入框、添加按钮和列表区域，并保持基本的卡片式排版。",
