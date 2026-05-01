@@ -46,7 +46,7 @@ export function ReportView({ submission, report }: { submission: Submission; rep
   const isCompleted = submission.status === "completed";
 
   return (
-    <section className="flex flex-col gap-6">
+    <section className="container mx-auto flex flex-col gap-8 px-4 py-10 md:px-6 lg:px-8">
       <Card className="flex items-center justify-between p-8">
         <div>
           <Badge

@@ -80,7 +80,7 @@ export function CodeWorkspace({ problem, currentUser }: { problem: Problem; curr
   }
 
   return (
-    <section className="grid h-[calc(100vh-160px)] min-h-[600px] grid-cols-[450px_1fr] gap-4">
+    <section className="container mx-auto grid h-[calc(100vh-160px)] min-h-[600px] grid-cols-[450px_1fr] gap-4 px-4 py-6 md:px-6">
       <aside className="flex flex-col overflow-hidden rounded-xl border bg-card shadow-sm">
         <header className="flex items-center gap-3 border-b px-5 py-4">
           <span className={cn("text-sm font-bold", difficultyColorMap[problem.difficulty])}>

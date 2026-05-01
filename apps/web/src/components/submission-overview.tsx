@@ -26,7 +26,7 @@ function formatDate(value: string) {
 
 export function SubmissionOverview({ submissions }: { submissions: SubmissionSummary[] }) {
   return (
-    <div className="flex flex-col gap-6">
+    <div className="container mx-auto flex flex-col gap-8 px-4 py-10 md:px-6 lg:px-8">
       <Card>
         <CardHeader className="p-8 text-left">
           <Badge variant="outline" className="mb-3 w-fit border-blue-200 bg-blue-50 text-blue-700">
