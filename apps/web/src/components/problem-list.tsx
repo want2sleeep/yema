@@ -15,7 +15,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { CheckCircle2, Circle, CircleDashed, Star, Search, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { CheckCircle2, Circle, CircleDashed, Search, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 
 const difficultyLabelMap = {
   easy: "简单",
@@ -55,16 +55,6 @@ export function ProblemList({ problems }: { problems: ProblemSummary[] }) {
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [difficultySort, setDifficultySort] = useState<"none" | "asc" | "desc">("none");
-  const [favorites, setFavorites] = useState<Set<string>>(new Set());
-
-  const toggleFavorite = (id: string) => {
-    setFavorites((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
 
   const toggleDifficultySort = () => {
     setDifficultySort((prev) => {
@@ -113,6 +103,7 @@ export function ProblemList({ problems }: { problems: ProblemSummary[] }) {
             <div className="flex flex-wrap gap-2">
               {CATEGORIES.map((category) => (
                 <button
+                  type="button"
                   key={category}
                   onClick={() => setSelectedCategory(category)}
                   className={cn(
@@ -143,6 +134,7 @@ export function ProblemList({ problems }: { problems: ProblemSummary[] }) {
           <div className="flex flex-wrap gap-2">
             {DIFFICULTIES.map((diff) => (
               <button
+                type="button"
                 key={diff.value}
                 onClick={() => setSelectedDifficulty(diff.value)}
                 className={cn(
@@ -163,6 +155,7 @@ export function ProblemList({ problems }: { problems: ProblemSummary[] }) {
           <div className="flex flex-wrap gap-2">
             {STATUS_FILTERS.map((status) => (
               <button
+                type="button"
                 key={status.value}
                 onClick={() => setSelectedStatus(status.value)}
                 className={cn(
@@ -186,18 +179,35 @@ export function ProblemList({ problems }: { problems: ProblemSummary[] }) {
             <TableRow className="bg-muted/30">
               <TableHead className="w-20 text-center font-bold text-sm text-foreground uppercase tracking-wider">状态</TableHead>
               <TableHead className="text-left font-bold text-sm text-foreground uppercase tracking-wider">题目</TableHead>
-              <TableHead 
-                className="w-32 text-center font-bold text-sm text-foreground uppercase tracking-wider cursor-pointer hover:bg-muted/50 transition-colors"
-                onClick={toggleDifficultySort}
+              <TableHead
+                className="w-32 text-center font-bold text-sm text-foreground uppercase tracking-wider"
+                aria-sort={
+                  difficultySort === "asc"
+                    ? "ascending"
+                    : difficultySort === "desc"
+                      ? "descending"
+                      : "none"
+                }
               >
-                <div className="flex items-center justify-center gap-1">
-                  难度
+                <button
+                  type="button"
+                  className="flex w-full items-center justify-center gap-1 px-2 py-1 transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  onClick={toggleDifficultySort}
+                  aria-label={
+                    difficultySort === "asc"
+                      ? "按难度排序，当前为升序"
+                      : difficultySort === "desc"
+                        ? "按难度排序，当前为降序"
+                        : "按难度排序，当前未排序"
+                  }
+                >
+                  <span>难度</span>
                   {difficultySort === "none" && <ArrowUpDown className="h-3 w-3 opacity-50" />}
                   {difficultySort === "asc" && <ArrowUp className="h-3 w-3 text-primary" />}
                   {difficultySort === "desc" && <ArrowDown className="h-3 w-3 text-primary" />}
-                </div>
+                </button>
               </TableHead>
-              <TableHead className="w-40 text-center font-bold text-sm text-foreground uppercase tracking-wider">操作</TableHead>
+              <TableHead className="w-32 text-center font-bold text-sm text-foreground uppercase tracking-wider">操作</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -259,32 +269,16 @@ export function ProblemList({ problems }: { problems: ProblemSummary[] }) {
                     </span>
                   </TableCell>
                   <TableCell className="text-center">
-                    <div className="flex items-center justify-center gap-3 px-2">
-                      <Link
-                        href={`/problems/${problem.id}`}
-                        className={buttonVariants({
-                          variant: problem.status === "solved" ? "outline" : "default",
-                          size: "sm",
-                          className: "h-8 text-sm font-bold flex-1",
-                        })}
-                      >
-                        {problem.status === "solved" ? "再次练习" : "开始作答"}
-                      </Link>
-                      <button
-                        onClick={() => toggleFavorite(problem.id)}
-                        className="group flex h-8 w-8 items-center justify-center rounded-full transition-all hover:bg-muted"
-                        title={favorites.has(problem.id) ? "取消收藏" : "收藏题目"}
-                      >
-                        <Star
-                          className={cn(
-                            "h-5 w-5 transition-all",
-                            favorites.has(problem.id)
-                              ? "fill-yellow-400 text-yellow-400 scale-110"
-                              : "text-muted-foreground group-hover:text-yellow-500"
-                          )}
-                        />
-                      </button>
-                    </div>
+                    <Link
+                      href={`/problems/${problem.id}`}
+                      className={buttonVariants({
+                        variant: problem.status === "solved" ? "outline" : "default",
+                        size: "sm",
+                        className: "h-8 text-sm font-bold",
+                      })}
+                    >
+                      {problem.status === "solved" ? "再次练习" : "开始作答"}
+                    </Link>
                   </TableCell>
                 </TableRow>
               ))
